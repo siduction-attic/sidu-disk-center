@@ -1,0 +1,16 @@
+<div id="text_area">
+<h1>###txt_title###</h1>
+<div class="textblock">
+<p>###txt_intro###</p>
+<p>###txt_intro2###</p>
+<p>###txt_intro3###</p>
+<p>###txt_intro4###</p>
+</div>
+<div class="textblock">
+<ul>
+<li><a href="http:index.php/overview">###txt_content_table1###</a></li>
+<li><a href="http:index.php/physicalview">###txt_content_table2###</a></li>
+<li><a href="http:index.php/logicalview">###txt_content_table3###</a></li>
+</ul>
+</div>
+</div> <!--text_area-->

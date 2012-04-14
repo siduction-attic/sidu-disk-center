@@ -1,0 +1,38 @@
+<div id="text_area">
+<h1>###txt_title###</h1>
+###WAIT_FOR_PARTINFO###
+<div class="textblock">
+<p>###txt_intro###</p>
+</div>
+<div class="textblock">
+###txt_action_intro###
+<table width="100%">
+<tr>
+ <td>###txt_action###</td>
+  <td><select name="action" size="1">
+###OPT_ACTION###
+ </select>
+ </td>
+ <td>
+	<input type="submit" name="button_action" value="###txt_button_action###"/>
+ </td>
+ </tr>
+ <tr><td colspan="2">###txt_volume_group###</td>
+  <td><select name="volume_group">###OPT_VOLUME_GROUP###</select>
+ </tr>
+ <tr><td colspan="5"><hr></td>
+ </tr>
+ <tr>
+###PART_ACTION###
+ </tr>
+ </table>
+###ERROR_MESSAGE###
+</div>
+<div class="textblock">
+<h3>###txt_current_groups###</h3>
+###PART_TABLES###
+<div class="center"><input type="submit" name="button_reload" value="###txt_button_reload###"/>
+</div>
+</div>
+###LAST_LOG###
+</div> <!-- text_area-->

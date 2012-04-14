@@ -1,0 +1,16 @@
+Source: sidu-disk-center
+Section: unknown
+Priority: extra
+Maintainer: J. Hamatoma <hama@siduction.net>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://siduction.org
+Vcs-git: git://git.siduction.org:packages/siduction-repository/sidu-disk-center
+Vcs-Browser: http://git.siduction.org/?p=packages/siduction-repository/sidu-disk-center.git
+
+Package: sidu-disk-center
+Architecture: all
+Depends: ${misc:Depends},
+   siguibui (>= 1.0.3)
+Description: a browser based tool for handling of partitions.
+ Includes the possibility to manage LVM media.

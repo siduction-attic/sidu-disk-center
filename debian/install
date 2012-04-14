@@ -1,0 +1,6 @@
+backend		usr/share/sidu-disk-center
+config		usr/share/sidu-disk-center
+plugins		usr/share/sidu-disk-center		
+etc/sidu-disk-center	etc
+etc/pywwetha	etc
+usr/bin		usr

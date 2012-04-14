@@ -1,0 +1,13 @@
+<div id="text_area">
+<h1>###txt_title###</h1>
+<div class="textblock">
+<p>###txt_intro###</p>
+<p>###txt_intro2###</p>
+<p>###txt_intro3###</p>
+</div>
+<div class="textblock">
+<h2>###txt_title_shell###</h2>
+<pre>###txt_cmd_1###
+</pre>
+</div>
+</div> <!-- text_area-->

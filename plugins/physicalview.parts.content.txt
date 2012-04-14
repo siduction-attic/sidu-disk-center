@@ -1,0 +1,60 @@
+PV_TABLE:
+<h4>###txt_title_volume_group###</h4>
+<table id="pvtable" border="1">
+ <tr>
+###PV_HEADERS###
+ </tr>
+###PV_ROWS###
+</table>
+
+PV_HEADER:
+<th>###PV_VAL###</th>
+PV_ROW:
+ <tr>###PV_COLS###
+ </tr>
+PV_COL:
+ <td>###PV_VAL###</td>
+
+ASSIGN:
+ <td colspan="5">###txt_descr_assign_pv###</td>
+</tr>
+<tr>
+ <td>###txt_assign_pv_pv###</td>
+ <td><select name="assign_pv_pv">###OPT_ASSIGN_PV_PV###</select>
+ </td>
+ <td>###txt_assign_pv_vg###</td>
+ <td><select name="assign_pv_vg">###OPT_ASSIGN_PV_VG###</select>
+ </td>
+ <td><input type="submit" name="button_assign_pv" value="###txt_button_assign_pv###">
+ </td>
+ 
+CREATE_VG:
+ <td colspan="5">###txt_descr_create_vg###</td>
+</tr>
+<tr>
+ <td>###txt_create_vg_vg###</td>
+ <td><input type="text" name="create_vg_vg" size="10" value="###VAL_NEW_VG###">
+ <td>###txt_create_vg_pv###</td>
+ <td><select name="create_vg_pv">###OPT_CREATE_VG_PV###</select>
+ </td>
+ <td><input type="submit" name="button_create_vg" value="###txt_button_create_vg###">
+ </td>
+ 
+CREATE_PV:
+ <td colspan="5">###txt_descr_create_pv###</td>
+</tr>
+<tr>
+  <td>###txt_create_pv_pv###</td>
+  <td><select name="create_pv_pv">###OPT_CREATE_PV_PV###</select>
+ </td>
+ <td>&nbsp;</td>
+ <td><input type="submit" name="button_create_pv" value="###txt_button_create_pv###">
+ </td>
+ 
+LAST_LOG:
+ <div class="textblock">
+ <h4>###txt_title_last_log###</h4>
+ <pre>###TEXT###
+ </pre>
+ </div>
+END:
