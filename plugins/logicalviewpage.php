@@ -76,6 +76,8 @@ class LogicalviewPage extends Page{
 				$table = $this->buildTable($headers, $vgInfo, 'LV', 2);
 				$title = $this->i18n('txt_title_volume_group', null);
 				$title = str_replace('###VG_NAME###', $vg[1], $title);
+				$info = $this->diskInfo->getVGInfo($vg[1]);
+				$table = str_replace('###descr_vg###', $info, $table);
 				$table = str_replace('###txt_title_volume_group###', $title, $table);
 				$tables .= $table;
 			}
@@ -189,7 +191,7 @@ class LogicalviewPage extends Page{
 		$redraw = true;
 		$this->session->trace(TRACE_RARE, "onButton($button)");
 		$params = array();
-		if (strcmp($button, 'button_activate') == 0){
+		if (strcmp($button, 'button_action') == 0){
 			$this->setUserData('error_msg', '');
 		} elseif (strcmp($button, 'button_reload') == 0){
 			$this->diskInfo->forceReload();

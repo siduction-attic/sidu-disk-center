@@ -59,6 +59,7 @@ foreach $key (sort keys %disks){
 }
 &physicalView;
 &logicalView;
+&vgInfo;
 exit 0;
 
 # searches for extended info of a partition
@@ -367,4 +368,43 @@ sub logicalView{
 		}
 		close INP;
 	}
+}
+sub vgInfo {
+	if (open(INP, "vgdisplay|")){
+		my ($vgName, $size, $access, $status, $free, $alloc, %vgs, $peSize);
+		while(<INP>){
+			chomp;
+			if (/VG Name\s+(\S+)/){
+				$vgName = $1;
+			} elsif (m!VG Size\s+(\S.*)!){
+				$size = $1;
+			} elsif (m!VG Access\s+(\S.*)!){
+				$access = $1;
+			} elsif (m!VG Status\s+(\S.*)!){
+				$status = $1;
+			} elsif (m!Alloc PE / Size.*/\s+(\S.*)!){
+				$alloc = $1;
+			} elsif (m!Free  PE / Size.*/\s+(\S.*)!){
+				$free = $1;
+			} elsif (m!PE Size\s+(\S.*)!){
+				$peSize = $1;
+			} elsif (/--- Volume group/){
+				if ($vgName ne ""){
+					$vgs{$vgName} .= "|$size|$alloc|$free|$peSize|$status|$access";
+				}
+			}
+		}
+		if ($vgName ne ""){
+			$vgs{$vgName} .= "|$size|$alloc|$free|$peSize|$status|$access";
+		}
+		my ($key, $out);
+		foreach $key (sort keys %vgs){
+			$out .= "\t|$key" . $vgs{$key}; 
+		}
+		if ($out ne ""){
+			print "VgLVM:$out\n";
+		}
+		close INP;
+	}
+
 }

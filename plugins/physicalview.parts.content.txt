@@ -1,6 +1,7 @@
 PV_TABLE:
 <h4>###txt_title_volume_group###</h4>
-<table id="pvtable" border="1">
+<div>###descr_vg###</div>
+<table class="pvtable">
  <tr>
 ###PV_HEADERS###
  </tr>
@@ -32,10 +33,15 @@ CREATE_VG:
  <td colspan="5">###txt_descr_create_vg###</td>
 </tr>
 <tr>
- <td>###txt_create_vg_vg###</td>
- <td><input type="text" name="create_vg_vg" size="10" value="###VAL_NEW_VG###">
- <td>###txt_create_vg_pv###</td>
- <td><select name="create_vg_pv">###OPT_CREATE_VG_PV###</select>
+ <td>###txt_create_vg_vg###<br/>
+  <input type="text" name="create_vg_vg" size="10" value="###VAL_CREATE_VG_VG###">
+ </td>
+ <td>###txt_create_vg_pv###<br/>
+  <select name="create_vg_pv">###OPT_CREATE_VG_PV###</select>
+ </td>
+ <td>###txt_create_vg_ext_size###<br/>
+  <input type="text" name="create_vg_ext_size" size="3" value="###VAL_CREATE_VG_EXT_SIZE###">
+  <select name="create_vg_ext_unit">###OPT_CREATE_VG_EXT_UNIT###</select>
  </td>
  <td><input type="submit" name="button_create_vg" value="###txt_button_create_vg###">
  </td>

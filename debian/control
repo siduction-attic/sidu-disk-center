@@ -11,6 +11,6 @@ Vcs-Browser: http://git.siduction.org/?p=packages/siduction-repository/sidu-disk
 Package: sidu-disk-center
 Architecture: all
 Depends: ${misc:Depends},
-   siguibui (>= 1.0.3)
+   siguibui (>= 1.0.4)
 Description: a browser based tool for handling of partitions.
  Includes the possibility to manage LVM media.

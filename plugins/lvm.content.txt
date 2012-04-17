@@ -6,8 +6,18 @@
 <p>###txt_intro3###</p>
 </div>
 <div class="textblock">
-<h2>###txt_title_shell###</h2>
-<pre>###txt_cmd_1###
-</pre>
+<h2>###txt_title_first_steps###</h2>
+<p>###txt_step_intro###
+ <ul>
+  <li>###txt_step_1###</li>
+  <li>###txt_step_2###</li>
+  <li>###txt_step_3###</li>
+  <li>###txt_step_4###</li>
+  <li>###txt_step_5###</li>
+  <li>###txt_step_6###</li>
+  <li>###txt_step_7###</li>
+ </ul>
+###txt_step_note###
+</p>
 </div>
 </div> <!-- text_area-->

@@ -128,6 +128,10 @@ th { text-align: left; font-weight: bold; }
 table.table_col5 tr th { width: 20%; }
 table.table_col5 tr td { width: 20%; }
 table.table_col5 { width: 100%; }
+
+table.pvtable tr td { padding-right: 2em; }
+table.lvtable tr td { padding-right: 2em; }
+
 td { vertical-align: top; }
 .horicontal_line { border-top: 1px #ff6600 solid; margin-top: 1em; margin-bottom: 1em;}
 

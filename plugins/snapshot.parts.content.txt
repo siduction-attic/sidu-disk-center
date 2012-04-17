@@ -1,7 +1,6 @@
 LV_TABLE:
 <h4>###txt_title_volume_group###</h4>
-<div>###descr_vg###</div>
-<table class="lvtable">
+<table id="lvtable" border="1">
  <tr>
 ###LV_HEADERS###
  </tr>

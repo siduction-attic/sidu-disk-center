@@ -1,3 +1,10 @@
+sidu-disk-center (0.1.2) unstable; urgency=low
+
+  * first steps
+  * fix: html references
+
+ -- J. Hamatoma <hama@siduction.net>  Sat, 14 Apr 2012 13:31:20 +0200
+
 sidu-disk-center (0.1.1) unstable; urgency=low
 
   * Initial release

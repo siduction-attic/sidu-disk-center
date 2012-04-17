@@ -39,6 +39,8 @@ class DiskInfo {
 	var $uninitializedPV;
 	/// the VG array: name => array of LV names
 	var $volumeGroups;
+	/// array: key: name value: [size, used, free, status, access]
+	var $vgInfo;
 	/** Constructor.
 	 *
 	 * @param $session		the session info
@@ -194,6 +196,22 @@ class DiskInfo {
 			}
 		}
 	}
+	/**
+	 * Handles the info of the volume groups.
+	 *
+	 * @param $info a string describing the volume groups
+	 */
+	function handleVgLVM($info){
+		$volumeGroups = explode(substr($info, 0, 1), $info);
+		$this->vgInfo = array();
+		for ($gg = 1; $gg < count($volumeGroups); $gg++){
+			$vol = $volumeGroups[$gg];
+			$array = explode(substr($vol, 0, 1), $vol);
+			array_shift($array);
+			$vgName = array_shift($array);
+			$this->vgInfo[$vgName] = $array;
+		}
+	}
 	/** Gets the data of the partition info and put it into into the user data.
 	 */
 	function importPartitionInfo(){
@@ -210,6 +228,8 @@ class DiskInfo {
 				$this->handlePhysicalLVM(substr($line, 6));
 			elseif (strncmp($line, 'LogLVM:', 7) == 0)
 				$this->handleLogicalLVM(substr($line, 7));
+			elseif (strncmp($line, 'VgLVM:', 6) == 0)
+				$this->handleVgLVM(substr($line, 6));
 			elseif (strncmp($line, 'FreeLVM:', 8) == 0)
 				$this->handleFreeLVM(substr($line, 8));
 			elseif (strncmp($line, 'MarkedLVM:', 10) == 0)
@@ -458,33 +478,45 @@ class DiskInfo {
 		}
 		return $rc;
 	}
-	/** Adapts the partition/label lists respecting the mountpoints.
-	 *
-	 * The partitions belonging yet to a mountpoint will not appear in the selection lists.
+	/**
+	 * Returns the size of a physical volume in KiByte.
+	 * @param $pv Name of the PV
+	 * @return 	-1: PV not found<br>
+	 * 			otherwise: the size of the PV in KiByte
 	 */
-	function respectMountPoints(){
-		$page = $this->page;
-		$count = $page->getRowCount('mounts');
-		$value = $this->session->userData->getValue('mountpoint', 'opt_add_label');
-		$labels = explode(';', $value);
-		$value = $this->session->userData->getValue('mountpoint', 'opt_add_dev');
-		$devices = explode(';', $value);
-		for ($ix = 0; $ix < $count; $ix++){
-			$line = $page->getRow('mounts', $ix);
-			$cols = explode('|', $line);
-			$dev = $cols[0];
-			$label = $this->getPartitionLabel($dev);
-			$ix2 = $this->session->findIndex($labels, $label);
-			if ($ix2 >= 0)
-				unset($labels[$ix2]);
-			$ix2 = $this->session->findIndex($devices, $dev);
-			if ($ix2 >= 0)
-				unset($devices[$ix2]);
+	function getPVSize($pv){
+		$rc = -1;
+		if (strncmp($pv, "/dev/", 4) == 0)
+			$pv = substr($pv, 5);
+		if (array_key_exists($pv, $this->partitions)){
+			$size = $this->partitions[$pv]->size;
+			$value = floatval($size);
+			if (stripos($size, "M") > 0)
+				$value *= 1024;
+			elseif (stripos($size, "G") > 0)
+				$value *= 1024*1024*1024;
+			elseif (stripos($size, "T") > 0)
+				$value *= 1024*1024*1024*1024*1024;
+			$rc = intval($value);
 		}
-		$value = implode(';', $labels);
-		$this->session->userData->setValue('mountpoint', 'opt_add_label', $value);
-		$value = implode(';', $devices);
-		$this->session->userData->setValue('mountpoint', 'opt_add_dev', $value);
+		return $rc;
+	}
+	/**
+	 * Returns a description of a VG.
+	 *
+	 * @param $vg volume group
+	 * @return 	null: Not found<br>
+	 * 			otherwise: the description of the volumegroup
+	 */
+	function getVGInfo($vg){
+		$rc = '';
+		if (array_key_exists($vg, $this->vgInfo)){
+			$array = $this->vgInfo[$vg];
+			$rc = $this->session->i18n('diskinfo', 'txt_desc_vg_info')
+				. ' ' . $array[0] . ' / ' . $array[1] . ' / ' . $array[2]
+				. ' / ' . $array[3] . ' ' . $array[4]  . ' ' . $array[5];
+		}
+		return $rc;
 	}
 }
 /**
