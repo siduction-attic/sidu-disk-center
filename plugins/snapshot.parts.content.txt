@@ -1,32 +1,42 @@
-LV_TABLE:
+SNAP_TABLE:
 <h4>###txt_title_volume_group###</h4>
-<table id="lvtable" border="1">
+<div>###descr_vg###</div>
+<table id="snaptable" border="0">
  <tr>
-###LV_HEADERS###
+###SNAP_HEADERS###
  </tr>
-###LV_ROWS###
+###SNAP_ROWS###
 </table>
 
-LV_HEADER:
-<th>###LV_VAL###</th>
-LV_ROW:
- <tr>###LV_COLS###
+SNAP_HEADER:
+<th>###SNAP_VAL###</th>
+SNAP_ROW:
+ <tr>###SNAP_COLS###
  </tr>
-LV_COL:
- <td>###LV_VAL###</td>
+SNAP_COL:
+ <td>###SNAP_VAL###</td>
 
-CREATE_LV:
- <td colspan="5">###txt_descr_create_lv###</td>
+CREATE_SNAP:
+ <td colspan="6">###txt_descr_create_snap###</td>
 </tr>
 <tr>
- <td>###txt_create_lv_lv###</td>
- <td><input type="text" name="create_lv_lv" value="###VAL_CREATE_LV_LV###" size="10"/>
+ <td>###txt_create_snap_lv###<br/>
+   <input type="text" name="create_snap_lv" value="###VAL_CREATE_SNAP_LV###" size="10"/>
  </td>
- <td>###txt_create_lv_size###</td>
- <td><input type="text" name="create_lv_size" value="###VAL_CREATE_LV_SIZE###" size="6"/>
-  &nbsp;<select name="create_lv_unit">###OPT_CREATE_LV_UNIT###</select>
+ <td>###txt_create_snap_base_lv###<br/>
+   <select name="create_snap_base_lv">
+###OPT_CREATE_SNAP_BASE_LV###
+   </select>
+ <td>###txt_create_snap_access###<br/>
+   <select name="create_snap_access">
+ ###OPT_CREATE_SNAP_ACCESS###
+   </select>
  </td>
- <td><input type="submit" name="button_create_lv" value="###txt_button_create_lv###"/>
+ <td colspan="2">###txt_create_snap_size###<br/>
+ 	<input type="text" name="create_snap_size" value="###VAL_CREATE_SNAP_SIZE###" size="6"/>
+  &nbsp;<select name="create_snap_unit">###OPT_CREATE_SNAP_UNIT###</select>
+ </td>
+ <td><br/><input type="submit" name="button_create_snap" value="###txt_button_create_snap###"/>
  </td>
   
 LAST_LOG:

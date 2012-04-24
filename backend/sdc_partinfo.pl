@@ -339,7 +339,7 @@ sub physicalView{
 
 sub logicalView{
 	if (open(INP, "lvdisplay|")){
-		my ($lvName, $vgName, $size, $access, %devs);
+		my ($lvName, $vgName, $size, $access, %devs, %snaps, $parent);
 		while(<INP>){
 			chomp;
 			if (/LV Name\s+(\S+)/){
@@ -348,17 +348,29 @@ sub logicalView{
 				$vgName = $1;
 			} elsif (m!LV Size\s+(\S.*)!){
 				$size = $1;
+			} elsif (m!LV snapshot status[^/]+/.*/([^ /]+)!){
+				$parent = $1;
 			} elsif (m!LV Write Access\s+(\S.*)!){
 				$access = $1;
 			} elsif (/--- Logical volume/){
 				if ($lvName ne ""){
-					$devs{$vgName} .= "\t|$lvName|$size|$access";
+					if ($parent){
+						$snaps{$vgName} .= "\t|$lvName|$size|$access|$parent";
+						$parent = '';
+					} else {
+						$devs{$vgName} .= "\t|$lvName|$size|$access";
+					}
 				}
 			}
 		}
 		if ($lvName ne ""){
-			$devs{$vgName} .= "\t|$lvName|$size|$access";
+			if ($parent){
+				$snaps{$vgName} .= "\t|$lvName|$size|$access|$parent";
+			} else {
+				$devs{$vgName} .= "\t|$lvName|$size|$access";
+			}
 		}
+		close INP;
 		my ($key, $out);
 		foreach $key (sort keys %devs){
 			$out .= "\f\t$key" . $devs{$key}; 
@@ -366,7 +378,13 @@ sub logicalView{
 		if ($out ne ""){
 			print "LogLVM:$out\n";
 		}
-		close INP;
+		$out = '';
+		foreach $key (sort keys %snaps){
+			$out .= "\f\t$key" . $snaps{$key}; 
+		}
+		if ($out ne ""){
+			print "SnapLVM:$out\n";
+		}
 	}
 }
 sub vgInfo {

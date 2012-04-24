@@ -19,9 +19,10 @@ RmLink public
 
 # Remove the links to the shellserver:
 cd /usr/share/siguibui/backend
-RmLink example.sh
 RmLink sdc_partinfo.sh
 RmLink sdc_partinfo.pl
+RmLink sdc_lvm.sh
+
 popd >/dev/null
 #DEBHELPER#
 exit 0

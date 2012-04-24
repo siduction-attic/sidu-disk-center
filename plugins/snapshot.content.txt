@@ -10,15 +10,18 @@
 <table width="100%">
 <tr>
  <td>###txt_action###</td>
-  <td><select name="action" size="1">
+  <td colspan="3"><select name="action" size="1">
 ###OPT_ACTION###
  </select>
  </td>
  <td>
-	<input type="submit" name="button_action" value="###txt_button_action###"/>
+	<input type="submit" name="button_activate" value="###txt_button_activate###"/>
  </td>
  </tr>
- <tr><td colspan="5"><hr></td>
+  <tr><td colspan="2">###txt_volume_group###</td>
+  <td><select name="volume_group">###OPT_VOLUME_GROUP###</select>
+ </tr>
+ <tr><td colspan="6"><hr></td>
  </tr>
  <tr>
 ###PART_ACTION###

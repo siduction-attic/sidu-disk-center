@@ -35,7 +35,13 @@ class SnapshotPage extends Page{
 		$ix = $this->indexOfSelectionField('snapshot', 'action', null, 'opt_action');
 		switch($ix){
 		case 0:
-			$this->replacePartWithTemplate('ACTION', 'CREATE_LV');
+			$this->replacePartWithTemplate('ACTION', 'CREATE_SNAP');
+			$currentVG = $this->session->getField('volume_group');
+			if (empty($currentVG))
+				$currentVG = $this->getUserData('volume_group');
+			$list = $this->diskInfo->getLVsOfVG($currentVG);
+			$this->session->trace(TRACE_RARE, "buildActionPart: VG: $currentVG List: $list");
+			$this->setUserData('opt_create_snap_base_lv', $list);
 			break;
 		case 1:
 			$this->replacePartWithTemplate('ACTION', 'MOVE_LV');
@@ -65,7 +71,7 @@ class SnapshotPage extends Page{
 		$headers = $this->i18n('txt_headers', '|Name:|Size:');
 
 		$tables = '';
-		$rows = $this->diskInfo->getLVInfo();
+		$rows = $this->diskInfo->getSnapshotInfo();
 		if (empty($rows)){
 			$tables = $this->i18n('txt_no_volume_groups', null);
 		} else {
@@ -73,10 +79,12 @@ class SnapshotPage extends Page{
 			for ($gg = 1; $gg < count($vgArray); $gg++){
 				$vgInfo = $vgArray[$gg];
 				$vg = explode(substr($vgInfo, 0, 1), $vgInfo, 3);
-				$table = $this->buildTable($headers, $vgInfo, 'LV', 2);
+				$table = $this->buildTable($headers, $vgInfo, 'SNAP', 2);
 				$title = $this->i18n('txt_title_volume_group', null);
 				$title = str_replace('###VG_NAME###', $vg[1], $title);
 				$table = str_replace('###txt_title_volume_group###', $title, $table);
+				$info = $this->diskInfo->getVGInfo($vg[1]);
+				$table = str_replace('###descr_vg###', $info, $table);
 				$tables .= $table;
 			}
 		}
@@ -96,17 +104,20 @@ class SnapshotPage extends Page{
 		$this->replaceMarker('LAST_LOG', $log);
 
 		# The conditional html text must be put before into the $this->content
-		$this->fillOptions('create_lv_unit', false);
-		$this->fillOptions('create_lv_vg', true);
+		$this->fillOptions('create_snap_unit', false);
+		$this->fillOptions('create_snap_vg', true);
 		$this->fillOptions('volume_group', true);
+		$this->fillOptions('create_snap_base_lv', true);
+		$this->fillOptions('create_snap_access', false);
 	}
 	/** Returns an array containing the input field names.
 	 *
 	 * @return an array with the field names
 	 */
 	function getInputFields(){
-		$rc = array('action', 'volume_group', 'create_lv_lv', 'create_lv_size',
-				'create_lv_unit');
+		$rc = array('activation', 'volume_group', 'create_snap_lv',
+				'create_snap_size', 'create_snap_unit', 'create_snap_access',
+				'create_snap_base_lv');
 		return $rc;
 	}
 	/**
@@ -134,47 +145,65 @@ class SnapshotPage extends Page{
 	/**
 	 * Handles the button "create logical volume".
 	 */
-	function createLV(){
-		$name = $this->getUserData('create_lv_lv');
+	function createSnapshot(){
+		$name = $this->getUserData('create_snap_lv');
 		$vg = $this->session->getField('volume_group');
+		$baseLV = $this->session->getField('create_snap_base_lv');
 		if (empty($vg))
 			$vg = $this->getUserData('volume_group');
 		if (empty($name))
-			$this->setErrorMessage($this->i18n('txt_choose_lv'));
+			$this->setErrorMessage($this->i18n('txt_choose_snap'));
 		elseif (empty($vg))
 			$this->setErrorMessage($this->i18n('txt_choose_vg'));
+		elseif (empty($baseLV))
+			$this->setErrorMessage($this->i18n('txt_choose_base_lv'));
 		else
 		{
-			$unit = $this->indexOfList('snapshot', 'create_lv_unit', null, 'opt_create_lv_unit');
-			$size = $this->getUserData('create_lv_size');
-			if ($this->isValidContent('create_lv_lv', '-a-zA-Z1-9_.$@%&!=#', '-a-zA-Z1-9_.$@%&!=#', true, true)
-				&& $this->isValidContent('create_lv_size', '1-9', '0-9', true, true)){
+			$access = $this->session->getField('create_snap_access');
+			$ix = $this->indexOfSelectionField('snapshot', 'create_snap_access', null, 'opt_create_snap_access');
+			$access = $ix == 0 ? 'rw' : 'r';
+			$unit = $this->indexOfList('snapshot', 'create_snap_unit', null, 'opt_create_snap_unit');
+			$size = $this->getUserData('create_snap_size');
+			if ($this->isValidContent('create_snap_lv', '-a-zA-Z1-9_.$@%&!=#', '-a-zA-Z1-9_.$@%&!=#', true, true)
+				&& ($access == 'r' || $this->isValidContent('create_snap_size', '1-9', '0-9', true, true))){
 				if ($size < 1)
 					$this->setErrorMessage($this->i18n('txt_not_null'));
 				elseif ($unit == 0 && $size > 100)
 					$this->setErrorMessage($this->i18n('txt_100_percent'));
 				else {
 					$params = array();
-					array_push($params, 'lvcreate');
+					array_push($params, 'sncreate');
+					array_push($params, '-s');
+					array_push($params, '-p' . $access);
+					if ($access == 'r' && empty($size)){
+						$size = '2';
+							// MiByte:
+						$unit = 2;
+					}
+
 					switch($unit){
 					case 0: // % of rest
 						array_push($params, '-l');
+						array_push($params, $size . '%ORIGIN');
+						break;
+					case 1: // % of rest
+						array_push($params, '-l');
 						array_push($params, $size . '%FREE');
 						break;
-					case 1: # MiByte
+					case 2: # MiByte
 						array_push($params, '-L');
 						array_push($params, $size . 'M');
 						break;
-					case 2: # GiByte
+					case 3: # GiByte
 						array_push($params, '-L');
 						array_push($params, $size . 'G');
 						break;
 					default:
 						break;
 					}
-					array_push($params, '-n');
-					array_push($params, $name);
-					array_push($params, $vg);
+					array_push($params, '-n' . $name);
+					# array_push($params, $name);
+					array_push($params, "/dev/$vg/$baseLV");
 					$this->work($params);
 				}
 			}
@@ -195,8 +224,8 @@ class SnapshotPage extends Page{
 			$this->diskInfo->forceReload();
 			$this->setUserData('reload.partinfo', 'T');
 			$this->session->gotoPage('snapshot', 'snapshot.onButtonClick');
-		} elseif (strcmp($button, 'button_create_lv') == 0){
-			$this->createLV();
+		} elseif (strcmp($button, 'button_create_snap') == 0){
+			$this->createSnapshot();
 		} elseif (strcmp($button, 'button_next') == 0){
 			$redraw = $this->navigation(false);
 		} elseif (strcmp($button, 'button_prev') == 0){

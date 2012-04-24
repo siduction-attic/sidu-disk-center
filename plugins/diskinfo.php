@@ -32,13 +32,15 @@ class DiskInfo {
 	/// ALL ::= \t VG1 \t VG2 ... ; VGx ::= \f <vg_name> \f <PV1> \f <PV2> ... ; PVx ::= | <PV_name> | <PV_attr_1> ...
 	var $logicalViewLVM;
 	/// example (with additional blanks):
+	/// "\t \f usb8 \f | /dev/usb8/backup-home|8,00 GiB|read only|home   \t \f vertex \f |/dev/vertex/backup_monday|2,92 GiB|read only|home
+	/// ALL ::= \t VG1 \t VG2 ... ; VGx ::= \f <vg_name> \f <PV1> \f <PV2> ... ; PVx ::= | <PV_name> | <PV_attr_1> ...
+	var $snapshotLVM;
+	/// example (with additional blanks):
 	/// "\t |/dev/sda3|1.87 GiB \t |/dev/sdb5|9.95 GiB
 	var $freePV;
 	/// example (with additional blanks):
 	/// "\t |/dev/sda3|1.87 GiB \t |/dev/sdb5|9.95 GiB
 	var $uninitializedPV;
-	/// the VG array: name => array of LV names
-	var $volumeGroups;
 	/// array: key: name value: [size, used, free, status, access]
 	var $vgInfo;
 	/** Constructor.
@@ -52,7 +54,6 @@ class DiskInfo {
 		$this->hasInfo = false;
 		$this->page = $page;
 		$this->name = $page->name;
-		$this->volumeGroups = array();
 		if (strcmp($this->name, "overview") == 0)
 			$this->pageIndex = PAGE_OVERVIEW;
 		elseif (strcmp($this->name, "physicalview") == 0)
@@ -173,6 +174,7 @@ class DiskInfo {
 		}
 		$this->session->userData->setValue('physicalview', 'opt_assign_pv_vg', $groups);
 		$this->session->userData->setValue('logicalview', 'opt_volume_group', $groups);
+		$this->session->userData->setValue('snapshot', 'opt_volume_group', $groups);
 	}
 	/**
 	 * Handles the info of a LVM (logical view)
@@ -188,13 +190,20 @@ class DiskInfo {
 
 			$logVols = explode(substr($vol, 0, 1), $vol);
 			$vgName = $logVols[1];
-			$this->volumeGroups[$vgName] = $arrayLV;
 			for ($vv = 2; $vv < count($logVols); $vv++){
 				$logVol = $logVols[$vv];
 				$attrs = explode(substr($logVol, 0, 1), $logVol);
 				array_push($arrayLV, $attrs[1]);
 			}
 		}
+	}
+	/**
+	 * Handles the info of a LVM (logical view)
+	 *
+	 * @param $info a string describing the relation LV to VG
+	 */
+	function handleSnapshotsLVM($info){
+		$this->snapshotLVM = $info;
 	}
 	/**
 	 * Handles the info of the volume groups.
@@ -234,6 +243,8 @@ class DiskInfo {
 				$this->handleFreeLVM(substr($line, 8));
 			elseif (strncmp($line, 'MarkedLVM:', 10) == 0)
 				$this->handleMarkedLVM(substr($line, 10));
+			elseif (strncmp($line, 'SnapLVM:', 8) == 0)
+				$this->handleSnapshotsLVM(substr($line, 8));
 			else {
 				$cols = explode("\t", $line);
 				$dev = str_replace('/dev/', '', $cols[0]);
@@ -442,6 +453,13 @@ class DiskInfo {
 		return $this->uninitializedPV;
 	}
 
+	/** Returns the information about snapshots.
+	 *
+	 * @return a string describing the the snapshots
+	 */
+	function getSnapshotInfo(){
+		return $this->snapshotLVM;
+	}
 	/** Builds dynamic part of the partition info table.
 	 */
 	function buildInfoTable(){
@@ -486,7 +504,7 @@ class DiskInfo {
 	 */
 	function getPVSize($pv){
 		$rc = -1;
-		if (strncmp($pv, "/dev/", 4) == 0)
+		if (strncmp($pv, '/dev/', 4) == 0)
 			$pv = substr($pv, 5);
 		if (array_key_exists($pv, $this->partitions)){
 			$size = $this->partitions[$pv]->size;
@@ -515,6 +533,39 @@ class DiskInfo {
 			$rc = $this->session->i18n('diskinfo', 'txt_desc_vg_info')
 				. ' ' . $array[0] . ' / ' . $array[1] . ' / ' . $array[2]
 				. ' / ' . $array[3] . ' ' . $array[4]  . ' ' . $array[5];
+		}
+		return $rc;
+	}
+	/**
+	 * Returns the list of logical volumes of a given volume group.
+	 *
+	 * @param $vg		Name of the volume group
+	 * @return 	"": $vg not found
+	 * 			otherwise: the list of LV separated by ';', e.g. 'home;opt;data'
+	 */
+	function getLVsOfVG($vg){
+		$rc = null;
+		$vgs = explode(substr($this->logicalViewLVM, 0, 1), $this->logicalViewLVM);
+		for ($gg = 1; $gg < count($vgs); $gg++){
+			$devlist = $vgs[$gg];
+			$devs = explode(substr($devlist, 0, 1), $devlist);
+			if (strcmp($devs[1], $vg) == 0){
+				$list = "";
+				for ($dd = 2; $dd < count($devs); $dd++){
+					$info = $devs[$dd];
+					$infos = explode(substr($info, 0, 1), $info);
+					// e.g. /dev/group1/home
+					$nodes = explode('/', $infos[1]);
+					if (count($nodes) == 4)
+						$list .= ';' . $nodes[3];
+					else
+						$list .= ';' . $nodes;
+				}
+				if (! empty($list))
+					$list = substr($list, 1);
+				$rc = $list;
+
+			}
 		}
 		return $rc;
 	}
