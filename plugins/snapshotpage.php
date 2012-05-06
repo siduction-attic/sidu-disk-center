@@ -33,40 +33,42 @@ class SnapshotPage extends Page{
 	 */
 	function buildActionPart(){
 		$ix = $this->indexOfSelectionField('snapshot', 'action', null, 'opt_action');
+		$currentVG = $this->session->getField('volume_group');
+		if (empty($currentVG))
+			$currentVG = $this->getUserData('volume_group');
 		switch($ix){
 		case 0:
 			$this->replacePartWithTemplate('ACTION', 'CREATE_SNAP');
-			$currentVG = $this->session->getField('volume_group');
-			if (empty($currentVG))
-				$currentVG = $this->getUserData('volume_group');
 			$list = $this->diskInfo->getLVsOfVG($currentVG);
 			$this->session->trace(TRACE_RARE, "buildActionPart: VG: $currentVG List: $list");
 			$this->setUserData('opt_create_snap_base_lv', $list);
 			break;
 		case 1:
-			$this->replacePartWithTemplate('ACTION', 'MOVE_LV');
+			$del_command = $this->getUserData('del_command');
+			if (empty($del_command)){
+				$this->replacePartWithTemplate('ACTION', 'DEL_SNAP');
+				$list = $this->diskInfo->getSnapOfVG($currentVG);
+				$this->session->trace(TRACE_RARE, "buildActionPart: VG: $currentVG List: $list");
+				$this->setUserData('opt_del_snap_snap', $list);
+			} else {
+				$this->replacePartWithTemplate('ACTION', 'DEL_OUTPUT');
+				$this->replaceMarker('txt_del_command', $del_command);
+			}
+			$this->setUserData('del_command', '');
 			break;
 		default:
+			$this->clearPart('ACTION');
 			break;
 		}
 	}
-	/** Builds the core content of the page.
-	 *
-	 * Overwrites the method in the baseclass.
-	 */
-	function build(){
-		$this->session->trace(TRACE_RARE, 'snapshot.build()');
-		$this->readContentTemplate();
-		$this->readHtmlTemplates();
-		$this->fillOptions('action');
-
+	function buildSnapInfo(){
 		$this->diskInfo->buildInfoTable();
 		$text = $this->diskInfo->getWaitForPartitionMessage();
 		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
+				$this->content);
 		$text = $this->diskInfo->getWaitForPartitionMessage();
 		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
+				$this->content);
 
 		$headers = $this->i18n('txt_headers', '|Name:|Size:');
 
@@ -88,8 +90,28 @@ class SnapshotPage extends Page{
 				$tables .= $table;
 			}
 		}
-				if (! empty($tables))
+		if (! empty($tables))
 			$this->content = str_replace('###PART_TABLES###', $tables, $this->content);
+
+	}
+	/** Builds the core content of the page.
+	 *
+	 * Overwrites the method in the baseclass.
+	 */
+	function build(){
+		$this->session->trace(TRACE_RARE, 'snapshot.build()');
+		$this->readContentTemplate();
+		$this->readHtmlTemplates();
+		$this->fillOptions('action');
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text)){
+			$this->replacePartWithTemplate('SNAP_INFO');
+			$this->buildSnapInfo();
+		} else {
+			$this->replacePartWithTemplate('SNAP_INFO', 'WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
 		$this->buildActionPart();
 
 		$this->setFieldsFromUserData();
@@ -109,6 +131,15 @@ class SnapshotPage extends Page{
 		$this->fillOptions('volume_group', true);
 		$this->fillOptions('create_snap_base_lv', true);
 		$this->fillOptions('create_snap_access', false);
+		$this->fillOptions('del_snap_snap', true);
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text))
+			$this->clearPart('WAIT_FOR_PARTINFO');
+		else {
+			$this->replacePartWithTemplate('WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
 	}
 	/** Returns an array containing the input field names.
 	 *
@@ -117,7 +148,7 @@ class SnapshotPage extends Page{
 	function getInputFields(){
 		$rc = array('activation', 'volume_group', 'create_snap_lv',
 				'create_snap_size', 'create_snap_unit', 'create_snap_access',
-				'create_snap_base_lv');
+				'create_snap_base_lv', 'del_snap_snap');
 		return $rc;
 	}
 	/**
@@ -151,10 +182,8 @@ class SnapshotPage extends Page{
 		$baseLV = $this->session->getField('create_snap_base_lv');
 		if (empty($vg))
 			$vg = $this->getUserData('volume_group');
-		if (empty($name))
+		elseif (empty($name))
 			$this->setErrorMessage($this->i18n('txt_choose_snap'));
-		elseif (empty($vg))
-			$this->setErrorMessage($this->i18n('txt_choose_vg'));
 		elseif (empty($baseLV))
 			$this->setErrorMessage($this->i18n('txt_choose_base_lv'));
 		else
@@ -209,6 +238,23 @@ class SnapshotPage extends Page{
 			}
 		}
 	}
+	/**
+	 * Handles the button "delete a snapshot".
+	 */
+	function deleteSnapshot(){
+		$name = $this->getUserData('del_snap_snap');
+		$vg = $this->session->getField('volume_group');
+		if (empty($vg))
+			$vg = $this->getUserData('volume_group');
+		elseif (empty($name))
+			$this->setErrorMessage($this->i18n('txt_choose_snap_snap'));
+		else
+		{
+			$command = "lvremove -f $vg/$name";
+			$this->setUserData('del_command', $command);
+
+		}
+	}
 	/** Will be called on a button click.
 	 *
 	 * @param $button	the name of the button
@@ -226,6 +272,8 @@ class SnapshotPage extends Page{
 			$this->session->gotoPage('snapshot', 'snapshot.onButtonClick');
 		} elseif (strcmp($button, 'button_create_snap') == 0){
 			$this->createSnapshot();
+		} elseif (strcmp($button, 'button_del_snap') == 0){
+			$this->deleteSnapshot();
 		} elseif (strcmp($button, 'button_next') == 0){
 			$redraw = $this->navigation(false);
 		} elseif (strcmp($button, 'button_prev') == 0){

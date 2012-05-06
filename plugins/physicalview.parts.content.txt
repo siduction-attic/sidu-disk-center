@@ -63,4 +63,26 @@ LAST_LOG:
  <pre>###TEXT###
  </pre>
  </div>
+
+ACTION_MESSAGE:
+<div>
+###txt_description###
+</div>
+<pre>
+###txt_command###
+</pre>
+
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+###txt_no_info###
+</div>
+
+PV_INFO:
+<div class="textblock">
+<h3>###txt_current_groups###</h3>
+###PART_TABLES###
+<div class="center"><input type="submit" name="button_reload" value="###txt_button_reload###"/>
+</div>
+</div>
+
 END:

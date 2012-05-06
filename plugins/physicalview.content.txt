@@ -1,6 +1,5 @@
 <div id="text_area">
 <h1>###txt_title###</h1>
-###WAIT_FOR_PARTINFO###
 <div class="textblock">
 <p>###txt_intro###</p>
 </div>
@@ -25,11 +24,6 @@
  </table>
 ###ERROR_MESSAGE###
 </div>
-<div class="textblock">
-<h3>###txt_current_groups###</h3>
-###PART_TABLES###
-<div class="center"><input type="submit" name="button_reload" value="###txt_button_reload###"/>
-</div>
-</div>
+###PART_PV_INFO###
 ###LAST_LOG###
 </div> <!-- text_area-->

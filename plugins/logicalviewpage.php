@@ -33,34 +33,35 @@ class LogicalviewPage extends Page{
 	 */
 	function buildActionPart(){
 		$ix = $this->indexOfSelectionField('logicalview', 'action', null, 'opt_action');
+		$currentVG = $this->session->getField('volume_group');
+		if (empty($currentVG))
+			$currentVG = $this->getUserData('volume_group');
 		switch($ix){
 		case 0:
 			$this->replacePartWithTemplate('ACTION', 'CREATE_LV');
 			break;
 		case 1:
-			$this->replacePartWithTemplate('ACTION', 'MOVE_LV');
+			$del_command = $this->getUserData('del_command');
+			if (empty($del_command)){
+				$this->replacePartWithTemplate('ACTION', 'DEL_LV');
+				$list = $this->diskInfo->getLVsOfVG($currentVG);
+				$this->setUserData('opt_del_lv_lv', $list);
+			} else {
+				$this->replacePartWithTemplate('ACTION', 'DEL_OUTPUT');
+				$this->replaceMarker('txt_del_command', $del_command);
+			}
+			$this->setUserData('del_command', '');
 			break;
 		default:
+			$this->clearPart('ACTION');
 			break;
 		}
 	}
-	/** Builds the core content of the page.
-	 *
-	 * Overwrites the method in the baseclass.
-	 */
-	function build(){
-		$this->session->trace(TRACE_RARE, 'logicalview.build()');
-		$this->readContentTemplate();
-		$this->readHtmlTemplates();
-		$this->fillOptions('action');
-
+	function buildLogivalView(){
 		$this->diskInfo->buildInfoTable();
 		$text = $this->diskInfo->getWaitForPartitionMessage();
 		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
-		$text = $this->diskInfo->getWaitForPartitionMessage();
-		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
+				$this->content);
 
 		$headers = $this->i18n('txt_headers', '|Name:|Size:');
 
@@ -82,8 +83,29 @@ class LogicalviewPage extends Page{
 				$tables .= $table;
 			}
 		}
-				if (! empty($tables))
+		if (! empty($tables))
 			$this->content = str_replace('###PART_TABLES###', $tables, $this->content);
+	}
+	/** Builds the core content of the page.
+	 *
+	 * Overwrites the method in the baseclass.
+	 */
+	function build(){
+		$this->session->trace(TRACE_RARE, 'logicalview.build()');
+		$this->readContentTemplate();
+		$this->readHtmlTemplates();
+		$this->fillOptions('action');
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text)){
+			$this->replacePartWithTemplate('LV_INFO');
+			$this->buildLogivalView();
+
+		} else {
+			$this->replacePartWithTemplate('LV_INFO', 'WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
+
 		$this->buildActionPart();
 
 		$this->setFieldsFromUserData();
@@ -101,6 +123,15 @@ class LogicalviewPage extends Page{
 		$this->fillOptions('create_lv_unit', false);
 		$this->fillOptions('create_lv_vg', true);
 		$this->fillOptions('volume_group', true);
+		$this->fillOptions('del_lv_lv', true);
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text))
+			$this->clearPart('WAIT_FOR_PARTINFO');
+		else {
+			$this->replacePartWithTemplate('WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
 	}
 	/** Returns an array containing the input field names.
 	 *
@@ -108,7 +139,7 @@ class LogicalviewPage extends Page{
 	 */
 	function getInputFields(){
 		$rc = array('action', 'volume_group', 'create_lv_lv', 'create_lv_size',
-				'create_lv_unit');
+				'create_lv_unit'. 'del_lv_lv');
 		return $rc;
 	}
 	/**
@@ -182,6 +213,27 @@ class LogicalviewPage extends Page{
 			}
 		}
 	}
+	/**
+	 * Handles the button "delete a logical volume".
+	 */
+	function deleteLV(){
+		$name = $this->getUserData('del_lv_lv');
+		$vg = $this->session->getField('volume_group');
+
+
+		if (empty($vg))
+			$vg = $this->getUserData('volume_group');
+		elseif (empty($name))
+			$this->setErrorMessage($this->i18n('txt_choose_lv_lv'));
+		elseif ($this->diskInfo->anySnapshot($vg, $name))
+			$this->setErrorMessage($this->i18n('txt_snapshot_exist'));
+		else
+		{
+			$command = "lvremove -f $vg/$name";
+			$this->setUserData('del_command', $command);
+
+		}
+	}
 	/** Will be called on a button click.
 	 *
 	 * @param $button	the name of the button
@@ -199,6 +251,8 @@ class LogicalviewPage extends Page{
 			$this->session->gotoPage('logicalview', 'logicalview.onButtonClick');
 		} elseif (strcmp($button, 'button_create_lv') == 0){
 			$this->createLV();
+		} elseif (strcmp($button, 'button_del_lv') == 0){
+			$this->deleteLV();
 		} elseif (strcmp($button, 'button_next') == 0){
 			$redraw = $this->navigation(false);
 		} elseif (strcmp($button, 'button_prev') == 0){

@@ -37,6 +37,14 @@ class OverviewPage extends Page{
 		$this->session->trace(TRACE_RARE, 'Partition.build()');
 		$this->readContentTemplate();
 		$this->readHtmlTemplates();
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text))
+			$this->clearPart('WAIT_FOR_PARTINFO');
+		else {
+			$this->replacePartWithTemplate('WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
 		if ($this->getRowCount('partinfo') > 0)
 			$this->replacePartWithTemplate('INFO_TABLE');
 		else
@@ -47,9 +55,6 @@ class OverviewPage extends Page{
 		$this->fillOptions('disk2', true);
 		$this->fillRows('partinfo');
 		$this->diskInfo->buildInfoTable();
-		$text = $this->diskInfo->getWaitForPartitionMessage();
-		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
 	}
 	/** Returns an array containing the input field names.
 	 *

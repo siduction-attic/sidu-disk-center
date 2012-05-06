@@ -1,6 +1,5 @@
 <div id="text_area">
 <h1>###txt_title###</h1>
-###WAIT_FOR_PARTINFO###
 <div class="textblock">
 <p>###txt_intro###</p>
 </div>
@@ -18,7 +17,9 @@
  </td>
  </tr>
  <tr><td colspan="2">###txt_volume_group###</td>
-  <td><select name="volume_group">###OPT_VOLUME_GROUP###</select>
+  <td><select name="volume_group">
+###OPT_VOLUME_GROUP###
+       </select>
  </tr>
  <tr><td colspan="5"><hr></td>
  </tr>
@@ -28,11 +29,6 @@
  </table>
 ###ERROR_MESSAGE###
 </div>
-<div class="textblock">
-<h3>###txt_current_groups###</h3>
-###PART_TABLES###
-<div class="center"><input type="submit" name="button_reload" value="###txt_button_reload###"/>
-</div>
-</div>
+###PART_LV_INFO###
 ###LAST_LOG###
 </div> <!-- text_area-->

@@ -75,7 +75,8 @@ class DiskInfo {
 		$this->session->userData->setValue('physicalview', 'opt_create_pv_pv', '');
 		$this->session->userData->setValue('physicalview', 'opt_create_vg_pv', '');
 		$this->session->userData->setValue('logicalview', 'opt_create_lv_lv', '');
-		$this->session->userData->setValue('logicalview', 'volume_group', '');
+		$this->session->userData->setValue('logicalview', 'opt_del_snap_snap', '');
+		$this->session->userData->setValue('logicalview', 'opt_volume_group', '');
 
 		if ($forceRebuild && file_exists($this->filePartInfo)){
 			$this->session->userData->setValue('', 'partinfo', '');
@@ -89,6 +90,8 @@ class DiskInfo {
 			$session->exec($this->filePartInfo, SVOPT_DEFAULT,
 				'sdc_partinfo', NULL, 0);
 		$this->hasInfo = file_exists($this->filePartInfo);
+		$txt = $this->hasInfo ? "mit Info" : "ohne Info";
+		$this->session->trace(TRACE_RARE, "diskinfo: $txt");
 		if ($this->hasInfo)
 			$this->readPartitionInfo();
 		else
@@ -490,9 +493,7 @@ class DiskInfo {
 		if ($this->hasInfo)
 			$rc = '';
 		else{
-			$rc = $this->session->readFileFromPlugin('waitforpartinfo.txt', false);
-			$text = $this->session->configuration->getValue('diskinfo.txt_wait_for_partinfo');
-			$rc = str_replace('###txt_wait_for_partinfo###', $text, $rc);
+			$rc = $this->session->configuration->getValue('diskinfo.txt_wait_for_partinfo');
 		}
 		return $rc;
 	}
@@ -544,27 +545,80 @@ class DiskInfo {
 	 * 			otherwise: the list of LV separated by ';', e.g. 'home;opt;data'
 	 */
 	function getLVsOfVG($vg){
-		$rc = null;
-		$vgs = explode(substr($this->logicalViewLVM, 0, 1), $this->logicalViewLVM);
-		for ($gg = 1; $gg < count($vgs); $gg++){
-			$devlist = $vgs[$gg];
-			$devs = explode(substr($devlist, 0, 1), $devlist);
-			if (strcmp($devs[1], $vg) == 0){
-				$list = "";
-				for ($dd = 2; $dd < count($devs); $dd++){
-					$info = $devs[$dd];
-					$infos = explode(substr($info, 0, 1), $info);
-					// e.g. /dev/group1/home
-					$nodes = explode('/', $infos[1]);
-					if (count($nodes) == 4)
-						$list .= ';' . $nodes[3];
-					else
-						$list .= ';' . $nodes;
-				}
-				if (! empty($list))
-					$list = substr($list, 1);
-				$rc = $list;
+		return $this->getItemNamesOfVG($vg,  $this->logicalViewLVM);
+	}
+	/**
+	 * Returns the list of logical volumes of a given volume group.
+	 *
+	 * @param $vg		Name of the volume group
+	 * @return 	"": $vg not found
+	 * 			otherwise: the list of LV separated by ';', e.g. 'home;opt;data'
+	 */
+	function getSnapOfVG($vg){
+		return $this->getItemNamesOfVG($vg,  $this->snapshotLVM);
+	}
 
+	/**
+	 * Returns the list of logical volumes of a given volume group with a given type.
+	 *
+	 * @param $vg		Name of the volume group
+	 * @param $line		List of the VGs with the list of items.
+	 * @return 	"": $vg not found
+	 * 			otherwise: the list of items separated by ';', e.g. 'home;opt;data'
+	 */
+	function getItemNamesOfVG($vg, $line){
+		$rc = null;
+		if (! empty($line)){
+			$vgs = explode(substr($line, 0, 1), $line);
+			for ($gg = 1; $gg < count($vgs); $gg++){
+				$devlist = $vgs[$gg];
+				$devs = explode(substr($devlist, 0, 1), $devlist);
+				if (strcmp($devs[1], $vg) == 0){
+					$list = "";
+					for ($dd = 2; $dd < count($devs); $dd++){
+						$info = $devs[$dd];
+						$infos = explode(substr($info, 0, 1), $info);
+						// e.g. /dev/group1/home
+						$nodes = explode('/', $infos[1]);
+						if (count($nodes) == 4)
+							$list .= ';' . $nodes[3];
+						else
+							$list .= ';' . $nodes;
+					}
+					if (! empty($list))
+						$list = substr($list, 1);
+					$rc = $list;
+
+				}
+			}
+		}
+		return $rc;
+	}
+	/**
+	 * Tests whether at least one snapshot of a given LV exists.
+	 *
+	 * @param $vg 	volume group to test
+	 * @param $lv	logical volume to test
+	 * @return 	true: at least one snapshot exists.<br/>
+	 * 			false: otherwise
+	 */
+	function anySnapshot($vg, $lv){
+		$rc = false;
+		$snaps = $this->snapshotLVM;
+
+		if (! empty($snaps)){
+			$vgs = explode(substr($snaps, 0, 1), $snaps);
+			for ($gg = 1; ! $rc && $gg < count($vgs); $gg++){
+				$devlist = $vgs[$gg];
+				$devs = explode(substr($devlist, 0, 1), $devlist);
+				if (strcmp($devs[1], $vg) == 0){
+					for ($dd = 2; ! $rc && $dd < count($devs); $dd++){
+						$info = $devs[$dd];
+						$array = explode(substr($info, 0, 1), $info);
+						if (count($array) > 4 && strcmp($array[4], $lv) == 0)
+							$rc = true;
+					}
+				}
 			}
 		}
 		return $rc;

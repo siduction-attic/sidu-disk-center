@@ -11,4 +11,8 @@ INFO_TABLE:
 	</tr>
 	###ROWS_PARTINFO###
 </table>
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+###txt_no_info###
+</div>
 END:

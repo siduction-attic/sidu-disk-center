@@ -21,7 +21,7 @@ CREATE_SNAP:
 </tr>
 <tr>
  <td>###txt_create_snap_lv###<br/>
-   <input type="text" name="create_snap_lv" value="###VAL_CREATE_SNAP_LV###" size="10"/>
+   <input type="text" name="create_snap_lv" value="" size="10"/>
  </td>
  <td>###txt_create_snap_base_lv###<br/>
    <select name="create_snap_base_lv">
@@ -39,10 +39,48 @@ CREATE_SNAP:
  <td><br/><input type="submit" name="button_create_snap" value="###txt_button_create_snap###"/>
  </td>
   
+DEL_SNAP:
+ <td colspan="5">###txt_descr_del_snap###</td>
+</tr>
+<tr>
+ <td colspan="2">###txt_del_snap_lv###
+ </td>
+ <td colspan="2"><select name="del_snap_snap">
+###OPT_DEL_SNAP_SNAP###
+   </select>
+ <td><input type="submit" name="button_del_snap" value="###txt_button_del_snap###"/>
+ </td>
+
 LAST_LOG:
  <div class="textblock">
  <h4>###txt_title_last_log###</h4>
  <pre>###TEXT###
  </pre>
  </div>
+
+DEL_OUTPUT:
+</tr>
+<tr>
+<td colspan="5">
+<div>
+###txt_del_description###
+</div>
+<pre>
+###txt_del_command###
+</pre>
+</td>
+
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+###txt_no_info###
+</div>
+
+SNAP_INFO:
+<div class="textblock">
+<h3>###txt_current_groups###</h3>
+###PART_TABLES###
+<div class="center"><input type="submit" name="button_reload" value="###txt_button_reload###"/>
+</div>
+</div>
+
 END:

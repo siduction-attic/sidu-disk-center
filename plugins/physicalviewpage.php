@@ -49,23 +49,11 @@ class PhysicalviewPage extends Page{
 			break;
 		}
 	}
-	/** Builds the core content of the page.
-	 *
-	 * Overwrites the method in the baseclass.
+	/**
+	 * Builds the info about the PVs
 	 */
-	function build(){
-		$this->session->trace(TRACE_RARE, 'physicalview.build()');
-		$this->readContentTemplate();
-		$this->readHtmlTemplates();
-		$this->fillOptions('action');
-
+	function buildPhysicalViewTable(){
 		$this->diskInfo->buildInfoTable();
-		$text = $this->diskInfo->getWaitForPartitionMessage();
-		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
-		$text = $this->diskInfo->getWaitForPartitionMessage();
-		$this->content = str_replace('###WAIT_FOR_PARTINFO###', $text,
-			$this->content);
 
 		$headers = $this->i18n('txt_headers', '|Name:|Size:');
 
@@ -105,6 +93,28 @@ class PhysicalviewPage extends Page{
 		}
 		if (! empty($tables))
 			$this->content = str_replace('###PART_TABLES###', $tables, $this->content);
+
+	}
+	/** Builds the core content of the page.
+	 *
+	 * Overwrites the method in the baseclass.
+	 */
+	function build(){
+		$this->session->trace(TRACE_RARE, 'physicalview.build()');
+		$this->readContentTemplate();
+		$this->readHtmlTemplates();
+		$this->fillOptions('action');
+
+		$text = $this->diskInfo->getWaitForPartitionMessage();
+		if (empty($text)){
+			$this->replacePartWithTemplate('PV_INFO');
+			$this->buildPhysicalViewTable();
+
+		} else {
+			$this->replacePartWithTemplate('PV_INFO', 'WAIT_FOR_PARTINFO');
+			$this->content = str_replace('###txt_no_info###', $text, $this->content);
+		}
+
 		$this->buildActionPart();
 
 		$this->setFieldsFromUserData();
@@ -125,6 +135,7 @@ class PhysicalviewPage extends Page{
 		$this->fillOptions('create_pv_pv', true);
 		$this->fillOptions('create_vg_pv', true);
 		$this->fillOptions('create_vg_ext_unit', false);
+
 	}
 	/** Returns an array containing the input field names.
 	 *
