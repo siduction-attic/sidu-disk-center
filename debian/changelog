@@ -1,3 +1,9 @@
+sidu-disk-center (0.1.3+nmu2) unstable; urgency=low
+
+  * fixed DE translation of sidu-disk-center.conf; refs: #686
+
+ -- Ferdinand Thommes <devil@siduction.org>  Wed, 09 May 2012 14:32:41 +0200
+
 sidu-disk-center (0.1.3+nmu1) unstable; urgency=low
 
   * Non-maintainer upload.
