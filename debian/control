@@ -2,6 +2,7 @@ Source: sidu-disk-center
 Section: unknown
 Priority: extra
 Maintainer: J. Hamatoma <hama@siduction.net>
+Uploaders: Alf Gaida <agaida@siduction.org>
 Build-Depends: debhelper (>= 8.0.0)
 Standards-Version: 3.9.2
 Homepage: http://siduction.org
