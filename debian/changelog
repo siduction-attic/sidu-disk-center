@@ -1,8 +1,29 @@
-sidu-disk-center (0.1.3.1) unstable; urgency=low
+sidu-disk-center (0.1.4.1) unstable; urgency=low
 
   * English text corrections (done by Tartie)
 
  -- J. Hamatoma <hama@siduction.net>  Sun, 13 May 2012 19:18:58 +0200
+
+sidu-disk-center (0.1.4) unstable; urgency=low
+
+  * added myself as uploader
+  * bump version to 0.1.4
+  * rebuid closes #686 
+
+ -- Alf Gaida <agaida@siduction.org>  Sat, 12 May 2012 12:27:27 +0200
+
+sidu-disk-center (0.1.3+nmu2) unstable; urgency=low
+
+  * fixed DE translation of sidu-disk-center.conf; refs: #686
+
+ -- Ferdinand Thommes <devil@siduction.org>  Wed, 09 May 2012 14:32:41 +0200
+
+sidu-disk-center (0.1.3+nmu1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * fixed translation of sidu-disk-center.conf; refs: #686
+
+ -- Ferdinand Thommes <devil@siduction.org>  Wed, 09 May 2012 13:02:30 +0200
 
 sidu-disk-center (0.1.3) unstable; urgency=low
 
