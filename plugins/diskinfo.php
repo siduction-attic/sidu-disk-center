@@ -568,6 +568,7 @@ class DiskInfo {
 	 */
 	function getItemNamesOfVG($vg, $line){
 		$rc = null;
+		$this->session->trace(TRACE_FINE, "getItemNamesOfVG($vg): $line");
 		if (! empty($line)){
 			$vgs = explode(substr($line, 0, 1), $line);
 			for ($gg = 1; $gg < count($vgs); $gg++){
@@ -575,10 +576,12 @@ class DiskInfo {
 				$devs = explode(substr($devlist, 0, 1), $devlist);
 				if (strcmp($devs[1], $vg) == 0){
 					$list = "";
+					$this->session->trace(TRACE_FINE, "found: $devs");
 					for ($dd = 2; $dd < count($devs); $dd++){
 						$info = $devs[$dd];
 						$infos = explode(substr($info, 0, 1), $info);
 						// e.g. /dev/group1/home
+						$this->session->trace(TRACE_FINE,"nodes: $info");
 						$nodes = explode('/', $infos[1]);
 						if (count($nodes) == 4)
 							$list .= ';' . $nodes[3];

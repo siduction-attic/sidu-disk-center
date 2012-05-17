@@ -1,3 +1,9 @@
+sidu-disk-center (0.1.4.2) unstable; urgency=low
+
+  * Trace
+
+ -- J. Hamatoma <hama@siduction.net>  Wed, 16 May 2012 21:12:17 +0200
+
 sidu-disk-center (0.1.4.1) unstable; urgency=low
 
   * English text corrections (done by Tartie)
