@@ -6,9 +6,13 @@ sidu-disk-center (0.1.4.2) unstable; urgency=low
 
 sidu-disk-center (0.1.4.1) unstable; urgency=low
 
+  [ J. Hamatoma ]
   * English text corrections (done by Tartie)
 
- -- J. Hamatoma <hama@siduction.net>  Sun, 13 May 2012 19:18:58 +0200
+  [ Alf Gaida ]
+  * rebuild closes #698
+
+ -- Alf Gaida <agaida@siduction.org>  Sun, 13 May 2012 20:22:09 +0200
 
 sidu-disk-center (0.1.4) unstable; urgency=low
 
