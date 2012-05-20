@@ -576,17 +576,14 @@ class DiskInfo {
 				$devs = explode(substr($devlist, 0, 1), $devlist);
 				if (strcmp($devs[1], $vg) == 0){
 					$list = "";
-					$this->session->trace(TRACE_FINE, "found: $devs");
+					$this->session->trace(TRACE_FINE, "VG found: $devlist");
 					for ($dd = 2; $dd < count($devs); $dd++){
 						$info = $devs[$dd];
 						$infos = explode(substr($info, 0, 1), $info);
 						// e.g. /dev/group1/home
 						$this->session->trace(TRACE_FINE,"nodes: $info");
-						$nodes = explode('/', $infos[1]);
-						if (count($nodes) == 4)
-							$list .= ';' . $nodes[3];
-						else
-							$list .= ';' . $nodes;
+						$lv = $infos[1];
+						$list .= ';' . $lv;
 					}
 					if (! empty($list))
 						$list = substr($list, 1);

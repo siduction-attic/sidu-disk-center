@@ -24,9 +24,17 @@ CREATE_LV:
  <td><input type="text" name="create_lv_lv" value="" size="10"/>
  </td>
  <td>###txt_create_lv_size###</td>
- <td><input type="text" name="create_lv_size" value="###VAL_CREATE_LV_SIZE###" size="6"/>
+ <td colspan="3"><input type="text" name="create_lv_size" value="###VAL_CREATE_LV_SIZE###" size="6"/>
   &nbsp;<select name="create_lv_unit">###OPT_CREATE_LV_UNIT###</select>
- </td>
+</tr>
+<tr>
+ <td>###txt_create_lv_fs###</td>
+ <td><select name="create_lv_fs">
+###OPT_CREATE_LV_FS###
+   </select>
+  </td>
+ <td>###txt_create_lv_label###</td>
+ <td colspan="2"><input type="text" name="create_lv_label" value="###VAL_CREATE_LV_LABEL###" size="6"/> 
  <td><input type="submit" name="button_create_lv" value="###txt_button_create_lv###"/>
  </td>
   

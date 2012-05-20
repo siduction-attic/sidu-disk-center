@@ -124,6 +124,7 @@ class LogicalviewPage extends Page{
 		$this->fillOptions('create_lv_vg', true);
 		$this->fillOptions('volume_group', true);
 		$this->fillOptions('del_lv_lv', true);
+		$this->fillOptions('create_lv_fs', false);
 
 		$text = $this->diskInfo->getWaitForPartitionMessage();
 		if (empty($text))
@@ -139,7 +140,8 @@ class LogicalviewPage extends Page{
 	 */
 	function getInputFields(){
 		$rc = array('action', 'volume_group', 'create_lv_lv', 'create_lv_size',
-				'create_lv_unit'. 'del_lv_lv');
+				'create_lv_unit', 'del_lv_lv', 'create_lv_fs',
+				'create_lv_label');
 		return $rc;
 	}
 	/**
@@ -170,6 +172,8 @@ class LogicalviewPage extends Page{
 	function createLV(){
 		$name = $this->getUserData('create_lv_lv');
 		$vg = $this->session->getField('volume_group');
+		$fs = $this->session->getField('create_lv_fs');
+		$label = $this->session->getField('create_lv_label');
 		if (empty($vg))
 			$vg = $this->getUserData('volume_group');
 		if (empty($name))
@@ -208,7 +212,10 @@ class LogicalviewPage extends Page{
 					array_push($params, '-n');
 					array_push($params, $name);
 					array_push($params, $vg);
+					array_push($params, $fs);
+					array_push($params, $label);
 					$this->work($params);
+
 				}
 			}
 		}

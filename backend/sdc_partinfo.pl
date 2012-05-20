@@ -344,12 +344,14 @@ sub logicalView{
 			chomp;
 			if (/LV Name\s+(\S+)/){
 				$lvName = $1;
+				$lvName =~ s!/dev/[^/]+/!!;
 			} elsif (/VG Name\s+(\S+)/){
 				$vgName = $1;
 			} elsif (m!LV Size\s+(\S.*)!){
 				$size = $1;
-			} elsif (m!LV snapshot status[^/]+/.*/([^ /]+)!){
+			} elsif (m!LV snapshot status.*\sfor\s+(\S+)!){
 				$parent = $1;
+				$parent =~ s!/dev/[^/]+/!!;
 			} elsif (m!LV Write Access\s+(\S.*)!){
 				$access = $1;
 			} elsif (/--- Logical volume/){

@@ -1,6 +1,8 @@
 sidu-disk-center (0.1.4.2) unstable; urgency=low
 
-  * Trace
+  * LV can be created with a filesystem
+  * Fix: Retrieving the name of LVs (other output of lvdisplay)
+  * Closes #724
 
  -- J. Hamatoma <hama@siduction.net>  Wed, 16 May 2012 21:12:17 +0200
 
