@@ -5,3 +5,10 @@ base/*
 .classpath
 .project
 *~
+
+#debian trash
+debian/files
+debian/sidu-disk-center.debhelper.log
+debian/sidu-disk-center.substvars
+debian/sidu-disk-center/
+

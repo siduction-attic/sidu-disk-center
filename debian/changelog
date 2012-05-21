@@ -8,7 +8,7 @@ sidu-disk-center (0.1.4.2) unstable; urgency=low
   [ Alf Gaida ]
   * build closes #728
 
- -- Alf Gaida <agaida@ramme>  Mon, 21 May 2012 02:14:50 +0200
+ -- Alf Gaida <agaida@siduction.org>  Mon, 21 May 2012 02:17:47 +0200
 
 sidu-disk-center (0.1.4.1) unstable; urgency=low
 
