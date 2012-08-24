@@ -3,4 +3,10 @@
 # Restart forces the check of virtual hosts:
 sudo /etc/init.d/pywwetha restart
 sidu-shellserver-control start
-x-www-browser http://sidu-disk-center:8086
+if [ -n "${DISPLAY}" ] ; then
+# Launches x-www-browser if we are in kde, xfce, lxde, rqt, gnome 
+	x-www-browser http://sidu-disk-center:8086
+else
+# Launches www-browser ( elinks ) if we are in nox
+	www-browser http://sidu-disk-center:8086
+fi

@@ -1,3 +1,9 @@
+sidu-disk-center (0.1.4.3) unstable; urgency=low
+
+  * Test launch env for ${DISPLAY} to be able to install also in nox
+
+ -- Ovidiu Angelescu <mrhsaacdoh@gmail.com>  Fri, 24 Aug 2012 14:19:47 +0300
+
 sidu-disk-center (0.1.4.2) unstable; urgency=low
 
   [ J. Hamatoma ]
