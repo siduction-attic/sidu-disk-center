@@ -33,7 +33,13 @@ case "$CMD" in
 		LV=$PARAM4
 		VG=$PARAM5
 		$X $CMD $PARAM $PARAM2 $PARAM3 $LV $VG >>$TEMP1 2>&1
-		if [ "$PARAM6" != "-" ] ; then
+		if [ "$PARAM6" == 'swap' ] ; then
+			if [ "$PARAM7" != "" ] ; then
+				PARAM7="-L $PARAM7"
+			fi
+			date "+%Y.%m.%d/%H:%M: mkswap -f $PARAM7 /dev/$VG/$LV " >>$TEMP1
+			$X mkswap -f $PARAM7 /dev/$VG/$LV >>$TEMP1 2>&1
+		elif [ "$PARAM6" != "-" ] ; then
 			if [ "$PARAM7" != "" ] ; then
 				PARAM7="-L $PARAM7"
 			fi

@@ -47,6 +47,7 @@ DEL_LV:
  <td colspan="2"><select name="del_lv_lv">
 ###OPT_DEL_LV_LV###
    </select>
+ </td>
  <td><input type="submit" name="button_del_lv" value="###txt_button_del_lv###"/>
  </td>
 
