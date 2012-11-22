@@ -9,6 +9,7 @@ sidu-disk-center (0.1.7) UNRELEASED; urgency=low
 
 sidu-disk-center (0.1.6) unstable; urgency=low
 
+  [ J. Hamatoma ]
   * VG: formatting as swap
   * xhtml structure corrected
   * closes #731
@@ -16,6 +17,13 @@ sidu-disk-center (0.1.6) unstable; urgency=low
   * 
 
  -- J. Hamatoma <hama@siduction.net>  Thu, 22 Nov 2012 21:56:20 +0100
+
+sidu-disk-center (0.1.5) unstable; urgency=low
+
+  [ Alf Gaida ]
+  * rebuild closes #856
+
+ -- Alf Gaida <agaida@siduction.org>  Fri, 21 Sep 2012 10:30:07 +0200
 
 sidu-disk-center (0.1.4.3) unstable; urgency=low
 
