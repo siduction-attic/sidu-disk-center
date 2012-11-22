@@ -513,10 +513,11 @@ class DiskInfo {
 			if (stripos($size, "M") > 0)
 				$value *= 1024;
 			elseif (stripos($size, "G") > 0)
-				$value *= 1024*1024*1024;
+				$value *= 1024*1024;
 			elseif (stripos($size, "T") > 0)
-				$value *= 1024*1024*1024*1024*1024;
+				$value *= 1024*1024*1024;
 			$rc = intval($value);
+			$this->session->trace(TRACE_RARE, "getPVSize($pv): $value -> $rc");
 		}
 		return $rc;
 	}

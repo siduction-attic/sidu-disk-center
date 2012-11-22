@@ -215,7 +215,9 @@ class PhysicalviewPage extends Page{
 					$value = intval($this->diskInfo->getPVSize($pv) / 1024);
 					$unit = 'K';
 				}
+				$val = $value;
 				$value = $this->session->roundDownToPowerOf2($value);
+				$this->session->trace(TRACE_RARE, "vg_size: $val/$value unit: $unit");
 				array_push($params, '--physicalextentsize');
 				array_push($params, "$value$unit");
 				array_push($params, $this->getUserData('create_vg_vg'));
