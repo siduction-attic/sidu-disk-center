@@ -1,11 +1,15 @@
-sidu-disk-center (0.1.7) UNRELEASED; urgency=low
+sidu-disk-center (0.1.7) unstable; urgency=low
 
+  [ J. Hamatoma ]
   * Fix: default value of the PE blocksize (VolumeGroup) is too large (factor 1024)
     if the PV size is larger than 10G
   * Fixes #974
   * Rebuild closes #980
 
- -- J. Hamatoma <hama@siduction.net>  Thu, 22 Nov 2012 21:56:48 +0100
+  [ Alf Gaida ]
+  * rebuild closes #980 
+
+ -- Alf Gaida <agaida@siduction.org>  Thu, 22 Nov 2012 22:57:01 +0100
 
 sidu-disk-center (0.1.6) unstable; urgency=low
 
