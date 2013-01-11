@@ -1,3 +1,9 @@
+sidu-disk-center (0.1.9) UNRELEASED; urgency=low
+
+  * added automount-control.sh to sidu-disk-center
+
+ -- Ovidiu Angelescu <convbsd@siduction.net>  Fri, 11 Jan 2013 10:53:56 +0200
+
 sidu-disk-center (0.1.8) unstable; urgency=low
 
   [ Ovidiu Angelescu ]

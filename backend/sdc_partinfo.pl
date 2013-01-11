@@ -69,6 +69,7 @@ sub detective{
 	my $info = "";
 	my $dirMount = &getMountPoint($dev);
 	if ($dirMount eq ""){
+		system ("./automount-control.sh disabled");
 		system ("mount -o ro $dev $mountpoint");
 		$dirMount = $mountpoint;
 	}
@@ -85,6 +86,7 @@ sub detective{
 		$info .= "\tos:unix" if $info eq "" && -d "$dirMount/etc/passwd";		
 	}
 	if ($dirMount eq $mountpoint){
+		system ("./automount-control.sh enabled");
 		system ("umount $mountpoint");
 	}
 	

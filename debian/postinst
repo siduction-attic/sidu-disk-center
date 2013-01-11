@@ -35,6 +35,7 @@ MkLink sdc_lvm.sh $SRC
 MkLink sdc_partinfo.sh $SRC
 MkLink sdc_partinfo.pl $SRC
 MkLink2 /var/cache/siguibui/public /usr/share/$PROJECT
+MkLink2 /usr/share/siguibui/backend/automount-control.sh $SRC
 popd >/dev/null
 #DEBHELPER#
 exit 0
