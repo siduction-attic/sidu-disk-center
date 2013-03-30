@@ -7,9 +7,10 @@ sidu-disk-center (0.1.10) unstable; urgency=low
   * new copyright format
   * Hompage removed
   * Source fixed
+  * debian/control short description fixed
   * refs #1103
 
- -- Alf Gaida <agaida@siduction.org>  Sat, 30 Mar 2013 16:15:55 +0100
+ -- Alf Gaida <agaida@siduction.org>  Sat, 30 Mar 2013 16:19:18 +0100
 
 sidu-disk-center (0.1.9) unstable; urgency=low
 
