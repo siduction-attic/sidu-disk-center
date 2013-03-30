@@ -12,5 +12,5 @@ Package: sidu-disk-center
 Architecture: all
 Depends: ${misc:Depends},
    siguibui (>= 1.0.4)
-Description: a browser based tool for handling of partitions.
+Description: Browser based tool for handling of partitions.
  Includes the possibility to manage LVM media.
