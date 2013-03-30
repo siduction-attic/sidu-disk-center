@@ -1,9 +1,14 @@
-Format: http://dep.debian.net/deps/dep5
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: sidu-disk-center
-Source: http://siduction.org
+Source: git://git.siduction.org/code/sidu-disk-center
 
 Files: *
 Copyright: 2012 J. Hamatoma <hama@siduction.net>
+License: GPL-3.0+
+
+Files: debian/*
+Copyright:2013 Alf Gaida <agaida@siduction.org> 
+          2012 J. Hamatoma <hama@siduction.net>
 License: GPL-3.0+
 
 Files: config/sidu-disk-center.conf
@@ -27,4 +32,3 @@ License: GPL-3.0+
  .
  On Debian systems, the complete text of the GNU General
  Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
-

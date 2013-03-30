@@ -1,11 +1,10 @@
 Source: sidu-disk-center
-Section: unknown
+Section: utils
 Priority: extra
 Maintainer: J. Hamatoma <hama@siduction.net>
 Uploaders: Alf Gaida <agaida@siduction.org>
-Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 3.9.2
-Homepage: http://siduction.org
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.4
 Vcs-git: git://git.siduction.org:packages/siduction-repository/sidu-disk-center
 Vcs-Browser: http://git.siduction.org/?p=packages/siduction-repository/sidu-disk-center.git
 

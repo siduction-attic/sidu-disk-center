@@ -1,3 +1,16 @@
+sidu-disk-center (0.1.10) unstable; urgency=low
+
+  * Section: utils
+  * Homepage removed
+  * debhelper (>= 9)
+  * Standards 3.9.4
+  * new copyright format
+  * Hompage removed
+  * Source fixed
+  * refs #1103
+
+ -- Alf Gaida <agaida@siduction.org>  Sat, 30 Mar 2013 16:15:55 +0100
+
 sidu-disk-center (0.1.9) unstable; urgency=low
 
   [ Ovidiu Angelescu ]
