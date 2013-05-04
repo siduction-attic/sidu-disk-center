@@ -1,3 +1,9 @@
+sidu-disk-center (0.1.13) UNRELEASED; urgency=low
+
+  * sdc_partinfo.pl: better handling of mount/umount
+
+ -- J. Hamatoma <hama@siduction.net>  Sat, 04 May 2013 18:14:38 +0200
+
 sidu-disk-center (0.1.10) unstable; urgency=low
 
   * Section: utils

@@ -8,7 +8,9 @@ my $blkid = shift;
 $blkid = "/sbin/blkid -c /dev/null|" unless $blkid;
 my %disks;
 my $verbose = 0;
-my $mountpoint = "/tmp/partinfo-mount";
+my $gv_mount_base = "/tmp/partinfo-mount";
+my $gv_log = "/tmp/partinfo_err.log";
+my $gv_mount_no = 0;
 my %lvm;
 my %months = ( 
 	"Jan" => "01",
@@ -24,54 +26,86 @@ my %months = (
 	"Nov" => "11",
 	"Dec" => "12"
 );
-if (! -d $mountpoint){
-	mkdir $mountpoint;
-	print STDERR $mountpoint, " created\n" if $verbose;
-}
-my @diskDevs = &getDiskDev;
-#&getFdiskInfo;
-foreach(@diskDevs){
-	&getGdiskInfo($_, $gdisk);
-}
-# get the info from gdisk:
+my @diskDevs;
 my %devs;
-
-# get the info from blkid
-
-my %blkids = &getBlockId;
-&mergeDevs;
-
+my %blkids;
 my (%sorted, $key, $dev);
-foreach $dev (keys %blkids){
-	if ($dev =~ /(\D+)(\d+)/){
-		$key = $1 . sprintf ("%03d", $2);
-	} else {
-		$key = $dev;
-	} 
-	$sorted{$key} = $dev;
-}
-foreach $key (sort keys %sorted){
-	$dev = $sorted{$key};
-	print $dev, "\t", $blkids{$dev}, "\n";
-}
-foreach $key (sort keys %disks){
-	print $key, "\t", $disks{$key}, "\n";
-}
-&physicalView;
-&logicalView;
-&vgInfo;
+
+system ("./automount-control.sh disabled");
+&main();
+system ("./automount-control.sh enabled");
+
 exit 0;
 
-# searches for extended info of a partition
+sub main{
+	if (! -d $gv_mount_base){
+		mkdir $gv_mount_base;
+		print STDERR $gv_mount_base, " created\n" if $verbose;
+	}
+	@diskDevs = &getDiskDev;
+	#&getFdiskInfo;
+	foreach(@diskDevs){
+		&getGdiskInfo($_, $gdisk);
+	}
+	# get the info from gdisk:
+	
+	# get the info from blkid
+	
+	%blkids = &getBlockId;
+	&mergeDevs;
+	
+	foreach $dev (keys %blkids){
+		if ($dev =~ /(\D+)(\d+)/){
+			$key = $1 . sprintf ("%03d", $2);
+		} else {
+			$key = $dev;
+		} 
+		$sorted{$key} = $dev;
+	}
+	foreach $key (sort keys %sorted){
+		$dev = $sorted{$key};
+		print $dev, "\t", $blkids{$dev}, "\n";
+	}
+	foreach $key (sort keys %disks){
+		print $key, "\t", $disks{$key}, "\n";
+	}
+	&physicalView;
+	&logicalView;
+	&vgInfo;
+	&UnmountAll;
+}
+sub UnmountAll{
+	opendir(DIR, $gv_mount_base);
+	my $dir;
+	my $run = 0;
+	while ($run < 2){
+		$run++;
+		my $errors = 0;
+		while ($dir = readdir(DIR)){
+			next if $dir =~ /\.{1,2}/;
+			my $full = "$gv_mount_base/$dir";
+			system ("echo $full >>$gv_log 2>&1");
+			system ("umount $full >>$gv_log 2>&1");
+			rmdir $full;
+			if (-d $full){
+				print 
+				system ("lsof +d $full >>$gv_log 2>&1");
+				$errors++;
+			}
+		}
+		last if $errors == 0;
+		sleep 1;
+	}
+}	
 sub detective{
 	my $dev = shift;
 	my $fs = shift;
 	my $info = "";
 	my $dirMount = &getMountPoint($dev);
 	if ($dirMount eq ""){
-		system ("./automount-control.sh disabled");
-		system ("mount -o ro $dev $mountpoint");
-		$dirMount = $mountpoint;
+		$dirMount = sprintf("$gv_mount_base/m%03d", ++$gv_mount_no);
+		mkdir $dirMount;
+		system ("mount -o ro $dev $dirMount >>$gv_log 2>&1");
 	}
 	if ($fs eq "ntfs" || $fs =~ /^vfat|fat\d/){
 		if (-d "$dirMount/windows/system32"){
@@ -85,9 +119,9 @@ sub detective{
 		$info .= &firstLineOf("$dirMount/etc/siduction-version", "subdistro");
 		$info .= "\tos:unix" if $info eq "" && -d "$dirMount/etc/passwd";		
 	}
-	if ($dirMount eq $mountpoint){
-		system ("./automount-control.sh enabled");
-		system ("umount $mountpoint");
+	if ($dirMount =~ /^$gv_mount_base/){
+		system ("umount $dirMount >>$gv_log 2>&1");
+		rmdir $dirMount;
 	}
 	
 	if ($fs =~ /fs:ext\d/){
