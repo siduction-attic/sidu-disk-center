@@ -17,12 +17,12 @@ pushd /usr/share/$PROJECT >/dev/null
 SRC=../siguibui
 function MkLink(){
 	if [ ! -L $1 ] ; then
-		ln -s $2/$1 $1
+		ln -sf $2/$1 $1
 	fi
 }
 function MkLink2(){
 	if [ ! -L $2 ] ; then
-		ln -s $1 $2
+		ln -sf $1 $2
 	fi
 }
 MkLink index.php $SRC
