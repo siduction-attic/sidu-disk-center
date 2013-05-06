@@ -1,9 +1,13 @@
-sidu-disk-center (0.1.14) UNRELEASED; urgency=low
+sidu-disk-center (0.1.14) unstable; urgency=low
 
+  [ J. Hamatoma ]
   * sdc_partinfo.pl: better handling of mount/umount
   * postinst: missing -f in ln command
 
- -- J. Hamatoma <hama@siduction.net>  Sat, 04 May 2013 19:50:40 +0200
+  [ Alf Gaida ]
+  * rebuild closes #1182
+
+ -- Alf Gaida <agaida@siduction.org>  Mon, 06 May 2013 02:45:11 +0200
 
 sidu-disk-center (0.1.10) unstable; urgency=low
 
