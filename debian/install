@@ -1,7 +1,9 @@
 backend		usr/share/sidu-disk-center
 config		usr/share/sidu-disk-center
-plugins		usr/share/sidu-disk-center
-images		usr/share/sidu-disk-center		
-etc/sidu-disk-center	etc
+diskcenter	usr/share/sidu-disk-center
+dsource		usr/share/sidu-disk-center
+sidu-disk-center	usr/share/sidu-disk-center
+data		usr/share/sidu-disk-center
+templates	usr/share/sidu-disk-center
 etc/pywwetha	etc
-usr/bin		usr
+bin		usr

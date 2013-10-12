@@ -1,0 +1,126 @@
+MAIN:
+<div id="text_area">
+<h1>{{logicalview.txt_title}}</h1>
+<div class="textblock">
+<p>{{logicalview.txt_intro}}</p>
+</div>
+<div class="textblock">
+{{logicalview.txt_action_intro}}
+<table width="100%">
+<tr>
+ <td>{{logicalview.txt_action}}</td>
+  <td><select name="action" size="1" onchange="autoClick('button_action');">
+{{body_action}}
+ </select>
+ </td>
+ <td>
+	<input type="submit" name="button_action" value="{{logicalview.txt_button_action}}"/>
+ </td>
+ </tr>
+ <tr><td colspan="2">{{logicalview.txt_volume_group}}</td>
+  <td><select name="volume_group">
+{{body_volume_group}}
+       </select>
+  </td>
+ </tr>
+ <tr><td colspan="5"><div class="horicontal_line"></div></td>
+ </tr>
+ <tr>
+{{ACTION}}
+ </tr>
+ </table>
+{{error_message}}
+</div>
+{{LV_INFO}}
+{{LAST_LOG}}
+</div> <!-- text_area-->
+
+LV_TABLE:
+<h4>{{logicalview.txt_title_volume_group}}</h4>
+<div>{{logicalview.descr_vg}}</div>
+<table class="lvtable">
+ <tr>
+{{logicalview.LV_HEADERS}}
+ </tr>
+{{logicalview.LV_ROWS}}
+</table>
+
+LV_HEADER:
+<th>{{logicalview.LV_VAL}}</th>
+LV_ROW:
+ <tr>{{logicalview.LV_COLS}}
+ </tr>
+LV_COL:
+ <td>{{logicalview.LV_VAL}}</td>
+
+CREATE_LV:
+ <td colspan="5">{{logicalview.txt_descr_create_lv}}</td>
+</tr>
+<tr>
+ <td>{{logicalview.txt_create_lv_lv}}</td>
+ <td><input type="text" name="create_lv_lv" value="" size="10"/>
+ </td>
+ <td>{{logicalview.txt_create_lv_size}}</td>
+ <td colspan="3"><input type="text" name="create_lv_size" value="{{val_create_lv_size}}" size="6"/>
+  &nbsp;<select name="create_lv_unit">{{body_create_lv_unit}}</select>
+ </td>
+</tr>
+<tr>
+ <td>{{logicalview.txt_create_lv_fs}}</td>
+ <td><select name="create_lv_fs">
+{{body_create_lv_fs}}
+   </select>
+  </td>
+ <td>{{logicalview.txt_create_lv_label}}</td>
+ <td colspan="2"><input type="text" name="create_lv_label" value="{{val_create_lv_label}}" size="6"/> 
+ </td>
+ <td><input type="submit" name="button_create_lv" value="{{logicalview.txt_button_create_lv}}"/>
+ </td>
+  
+DEL_LV:
+ <td colspan="5">{{logicalview.txt_descr_del_lv}}</td>
+</tr>
+<tr>
+ <td colspan="2">{{logicalview.txt_del_lv_lv}}
+ </td>
+ <td colspan="2"><select name="del_lv_lv">
+{{opt_del_lv_lv}}
+   </select>
+ </td>
+ <td><input type="submit" name="button_del_lv" value="{{logicalview.txt_button_del_lv}}"/>
+ </td>
+
+LAST_LOG:
+ <div class="textblock">
+ <h4>{{logicalview.txt_title_last_log}}</h4>
+ <pre>{{logicalview.TEXT}}
+ </pre>
+ </div>
+ 
+DEL_OUTPUT:
+</tr>
+<tr>
+<td colspan="5">
+<div>
+{{logicalview.txt_del_description}}
+</div>
+<pre>
+{{logicalview.txt_del_command}}
+</pre>
+</td>
+
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+{{logicalview.txt_no_info}}
+</div>
+
+LV_INFO:
+<div class="textblock">
+<h3>{{logicalview.txt_current_groups}}</h3>
+{{logicalview.PART_TABLES}}
+<div class="center"><input type="submit" name="button_reload" value="{{logicalview.txt_button_reload}}"/>
+</div>
+</div>
+
+END:
+

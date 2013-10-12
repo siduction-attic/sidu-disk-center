@@ -1,0 +1,58 @@
+MAIN:
+<div id="text_area">
+<h1>{{overview.txt_title}}</h1>
+<div class="textblock">
+<p>{{overview.txt_intro}}</p>
+<p>{{overview.txt_intro2}}</p>
+<p>{{overview.txt_intro3}}</p>
+<p>{{overview.txt_intro4}}</p>
+<table id="table_partition_partman" class="table_col5">
+	<tr>
+		<td class="col_label">{{overview.txt_partman}}:
+		</td>
+		<td>
+			<select name="partman" size="1">
+			{{overview.OPT_PARTMAN}}
+			</select>
+		</td>
+		<td class="col_label">{{overview.txt_disk}}:
+		</td>
+		<td>
+			<select name="disk" size="1">
+			{{overview.OPT_DISK}}
+			</select>
+		</td>
+		<td>
+			<input type="submit" name="button_exec" value="{{overview.txt_exec}}" />
+		</td>
+	</tr>
+</table>
+<div class="error_message">{{err_disk}}</div>
+<div class="center"><input type="submit" name="button_reload" value="{{overview.txt_reload}}" />
+</div>
+</div>
+<div class="textblock">
+<p>{{overview.txt_intro_info}}
+</p>
+{{INFO}}
+</div>
+</div> <!-- text_area-->
+
+INFO_TABLE:
+<div class="horicontal_line"></div>
+<table id="rootfs_part_info">
+	<tr>
+		<th>{{overview.txt_device}}</th>
+		<th>{{overview.txt_label}}</th>
+		<th>{{overview.txt_size}}</th>
+		<th>{{overview.txt_parttype}}</th>
+		<th>{{overview.txt_fs}}</th>
+		<th>{{overview.txt_info}}</th>
+	</tr>
+	{{overview.ROWS_PARTINFO}}
+</table>
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+{{overview.txt_no_info}}
+</div>
+END:

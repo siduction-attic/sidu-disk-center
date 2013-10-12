@@ -1,0 +1,121 @@
+MAIN:
+<div id="text_area">
+<h1>{{snapshots.txt_title}}</h1>
+<div class="textblock">
+<p>{{snapshots.txt_intro}}</p>
+<p>{{snapshots.txt_intro2}}</p>
+</div>
+<div class="textblock">
+{{snapshots.txt_action_intro}}
+<table width="100%">
+<tr>
+ <td>{{snapshots.txt_action}}</td>
+  <td colspan="3"><select name="action" size="1">
+{{body_action}}
+ </select>
+ </td>
+ <td>
+	<input type="submit" name="button_activate" value="{{snapshots.txt_button_activate}}"/>
+ </td>
+ </tr>
+  <tr><td colspan="2">{{snapshots.txt_volume_group}}</td>
+  <td><select name="volume_group">{{body_volume_group}}</select>
+ </tr>
+ <tr><td colspan="6"><hr></td>
+ </tr>
+ <tr>
+{{ACTION}}
+ </tr>
+ </table>
+{{error_message}}
+</div>
+{{SNAP_INFO}}
+{{LAST_LOG}}
+</div> <!-- text_area-->
+
+SNAP_TABLE:
+<h4>{{snapshots.txt_title_volume_group}}</h4>
+<div>{{snapshots.descr_vg}}</div>
+<table id="snaptable" border="0">
+ <tr>
+{{snapshots.SNAP_HEADERS}}
+ </tr>
+{{snapshots.SNAP_ROWS}}
+</table>
+
+SNAP_HEADER:
+<th>{{snapshots.SNAP_VAL}}</th>
+SNAP_ROW:
+ <tr>{{snapshots.SNAP_COLS}}
+ </tr>
+SNAP_COL:
+ <td>{{snapshots.SNAP_VAL}}</td>
+
+CREATE_SNAP:
+ <td colspan="6">{{snapshots.txt_descr_create_snap}}</td>
+</tr>
+<tr>
+ <td>{{snapshots.txt_create_snap_lv}}<br/>
+   <input type="text" name="create_snap_lv" value="{{val_create_snap_lv}}" size="10"/>
+ </td>
+ <td>{{snapshots.txt_create_snap_base_lv}}<br/>
+   <select name="create_snap_base_lv">
+{{body_create_snap_base_lv}}
+   </select>
+ <td>{{snapshots.txt_create_snap_access}}<br/>
+   <select name="create_snap_access">
+ {{body_create_snap_access}}
+   </select>
+ </td>
+ <td colspan="2">{{snapshots.txt_create_snap_size}}<br/>
+ 	<input type="text" name="create_snap_size" value="{{val_create_snap_size}}" size="6"/>
+  &nbsp;<select name="create_snap_unit">{{body_create_snap_unit}}</select>
+ </td>
+ <td><br/><input type="submit" name="button_create_snap" value="{{snapshots.txt_button_create_snap}}"/>
+ </td>
+  
+DEL_SNAP:
+ <td colspan="5">{{snapshots.txt_descr_del_snap}}</td>
+</tr>
+<tr>
+ <td colspan="2">{{snapshots.txt_del_snap_lv}}
+ </td>
+ <td colspan="2"><select name="del_snap_snap">
+{{snapshots.OPT_DEL_SNAP_SNAP}}
+   </select>
+ <td><input type="submit" name="button_del_snap" value="{{snapshots.txt_button_del_snap}}"/>
+ </td>
+
+LAST_LOG:
+ <div class="textblock">
+ <h4>{{snapshots.txt_title_last_log}}</h4>
+ <pre>{{snapshots.TEXT}}
+ </pre>
+ </div>
+
+DEL_OUTPUT:
+</tr>
+<tr>
+<td colspan="5">
+<div>
+{{snapshots.txt_del_description}}
+</div>
+<pre>
+{{snapshots.txt_del_command}}
+</pre>
+</td>
+
+WAIT_FOR_PARTINFO:
+<div class="textblock warning">
+{{snapshots.txt_no_info}}
+</div>
+
+SNAP_INFO:
+<div class="textblock">
+<h3>{{snapshots.txt_current_groups}}</h3>
+{{snapshots.PART_TABLES}}
+<div class="center"><input type="submit" name="button_reload" value="{{snapshots.txt_button_reload}}"/>
+</div>
+</div>
+
+END:

@@ -1,0 +1,3 @@
+# There will be probably never ever a man-page for pywwetha
+sidu-disk-center: binary-without-manpage usr/bin/sidu-disk-center-control
+

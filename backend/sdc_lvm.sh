@@ -1,5 +1,5 @@
 #! /bin/bash
-set -x
+test -n "$VERBOSE" && set -x
 ANSWER=$1
 CMD=$2
 PARAM=$3

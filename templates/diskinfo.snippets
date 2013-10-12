@@ -1,0 +1,89 @@
+TABLE_PARTINFO:
+<table class="table-partitioninfo">
+	<tr>
+		<th>{{diskinfo.txt_device}}</th>
+		<th>{{diskinfo.txt_label}}</th>
+		<th>{{diskinfo.txt_size}}</th>
+		<th>{{diskinfo.txt_parttype}}</th>
+		<th>{{diskinfo.txt_fs}}</th>
+		<th>{{diskinfo.txt_info}}</th>
+	</tr>
+	{{ROWS}}
+</table>
+
+TABLE_DISKINFO:
+<table class="table-diskinfo">
+	<tr>
+		<th>{{diskinfo.txt_device}}</th>
+		<th>{{diskinfo.txt_size}}</th>
+		<th>{{diskinfo.txt_info}}</th>
+	</tr>
+	{{ROWS}}
+</table>
+
+WARNING:
+<div class="textblock">
+ <p>{{diskinfo.txt_btrfs_warning}}</p>
+ <p class="center">
+  <select name="confirmation" size="2">
+   {{opt_confirmation}}
+   </select>
+ </div>
+</div>
+
+INFO_NO:
+<table class="table_col5">
+	<tr>
+{{STATE_SWITCH}}
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+</table>
+
+STATE_SWITCH:
+		<td>
+		<select name="infostate" size="1">
+		{{body_infostate}}
+		</select>
+		</td>
+		<td>
+			<input type="submit" name="button_infostate" value="{{diskinfo.txt_infostate}}" />
+		</td>
+
+INFO_PART:
+<p>{{diskinfo.txt_intro_info}}
+</p>
+<table class="table_col5">
+	<tr>
+{{STATE_SWITCH}}
+		<td>{{diskinfo.txt_disk}}:</td>
+		<td>
+			<select name="disk2" size="1">
+			{{body_disk2}}
+			</select>
+		</td>
+		<td>
+			<input type="submit" name="button_refresh" value="{{diskinfo.txt_refresh}}" />
+		</td>
+	</tr>
+</table>
+<div class="horicontal_line"></div>
+{{TABLE}}
+
+INFO_DISK:
+<p>{{diskinfo.txt_intro_info}}
+</p>
+<table class="table_col5">
+	<tr>
+{{STATE_SWITCH}}
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+</table>
+<div class="horicontal_line"></div>
+{{TABLE}}
+
+WAIT_FOR_INFO:
+{{diskinfo.txt_wait_for_partinfo}}

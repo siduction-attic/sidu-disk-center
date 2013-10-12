@@ -14,7 +14,7 @@ fi
 
 # Create the links from the toolkit:
 pushd /usr/share/$PROJECT >/dev/null
-SRC=../siguibui
+SRC=../sidu-base
 function MkLink(){
 	if [ ! -L $1 ] ; then
 		ln -sf $2/$1 $1
@@ -29,12 +29,12 @@ MkLink index.php $SRC
 MkLink base $SRC
 
 # Create the links to the shellserver:
-cd /usr/share/siguibui/backend
+cd /usr/share/sidu-base/backend
 SRC=../../$PROJECT/backend
 MkLink sdc_lvm.sh $SRC
 MkLink sdc_partinfo.sh $SRC
 MkLink sdc_partinfo.pl $SRC
-MkLink2 /var/cache/siguibui/public /usr/share/$PROJECT
+MkLink2 /var/cache/sidu-base/public /usr/share/$PROJECT
 MkLink2 /usr/share/siguibui/backend/automount-control.sh $SRC
 popd >/dev/null
 #DEBHELPER#

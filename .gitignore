@@ -5,6 +5,7 @@ base/*
 .classpath
 .project
 *~
+sqlite.db
 
 #debian trash
 debian/files
