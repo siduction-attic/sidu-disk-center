@@ -45,11 +45,38 @@ class LogicalViewPage(Page):
         # hidden fields:
         self.addField("answer")
 
+    def buildPartOfTable(self, mode, what, ixRow = None):
+        '''
+        @param mode:  distincts the different tables to build
+        @param what:  names a part of the table which will be returned
+                      "Table": None or html template of table with "{{ROWS}}"
+                      "Row:" None or a template with "{{COLS}}"
+                      "Col": None or a template with "{{COL}}"
+                      "rows": number of rows. Data type: int
+                      "cols": list of column values (data type: Object)
+        @param ixRow: index of the row (only relevant if what == "cols") 
+        @return:      the wanted part of the table
+        '''
+        rc = None
+        if what == "cols":
+            rc = self._tableRows[ixRow]
+        elif what == "rows":
+            rc = len(self._tableRows)
+        return rc
+
     def buildLVInfo(self):
         '''Builds the info table(s) for logical volumes.
         @return: the HTML text with the info
         '''
-        body = ""
+        body = self._snippets.get("LV_INFO")
+        self._tableRows = []
+        for item in self._diskInfo._partitionList:
+            if item._device.find("/") > 0:
+                cols = (item._device, item._size, item._label, 
+                    "<xml>" + item._info)
+                self._tableRows.append(cols)
+        content = self.buildTable(self, None)
+        body = body.replace("{{TABLE}}", content)
         return body
     
     def changeContent(self, body):
@@ -90,6 +117,49 @@ class LogicalViewPage(Page):
         body = body.replace("{{LV_INFO}}", content)
         return body
     
+    def work(self, params, doReload = True):
+        '''Executes the sdc_lvm command.
+        @param params:      parameter of the sdc_lvm command
+        @param doReload:    True: the reload of the partition info will be done
+        '''
+        answer = self.getField('answer');
+        if answer == None or answer == "":
+            answer = self._session._shellClient.buildFileName("lv", ".ready")
+            self.putField("answer", answer)
+        program = "sdc_lvm"
+        #params.insert(0, answer)
+        options = SVOPT_BACKGROUND
+        self.execute(answer, options, program, params, 0)
+        prog = " ".join(params)
+        rc = self.gotoWait("physicalview", answer, None, None, [prog])
+        if doReload:
+            self._diskInfo.reload()
+        return rc
+
+    def createLV(self):
+        '''Creates a logical volume.
+        '''
+        self.addField("del_lv_lv")
+        params = ["lvcreate"]
+        unit = self.getField("create_lv_unit")
+        value = self.getField("create_lv_size")
+        if unit.find("%") >= 0:
+            params.append("--extents")
+            params.append(str(value) + "%FREE")
+        else:
+            value = self.sizeAndUnitToByte(str(value) + unit) / 1024
+            params.append("--size")
+            params.append(str(value) + "K")
+        params.append("--name")
+        params.append(self.getField("create_lv_lv"))    
+        params.append(self.getField("volume_group"))
+        params.append(self.getField("create_lv_fs"))
+        params.append(self.getField("create_lv_label"))
+        self.putField("create_lv_lv", None)
+        self.putField("create_lv_size", None)
+        self.putField("create_lv_label", None)
+        self.work(params, True)
+        
     def handleButton(self, button):
         '''Do the actions after a button has been pushed.
         @param button: the name of the pushed button
@@ -98,7 +168,7 @@ class LogicalViewPage(Page):
         '''
         pageResult = None
         if button == "button_create_lv":
-            pass
+            self.createLV()
         elif button == "button_action":
             pass
         elif button == "button_reload":

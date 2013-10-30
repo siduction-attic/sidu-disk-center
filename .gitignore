@@ -6,10 +6,14 @@ base/*
 .project
 *~
 sqlite.db
-
+*.pyc
 #debian trash
 debian/files
 debian/sidu-disk-center.debhelper.log
 debian/sidu-disk-center.substvars
 debian/sidu-disk-center/
-
+backend/Sdc_partinfo.pl
+backend/automount-control.sh
+backend/format.sh
+backend/reboot.sh
+backend/*.pm

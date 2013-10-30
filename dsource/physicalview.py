@@ -60,7 +60,7 @@ class PhysicalViewPage(Page):
         if what == "cols":
             if ixRow > 0:
                 rc = self._tableRows[ixRow-1]
-                rc[0] = rc[0].replace("/dev/", "")
+                # rc[0] = rc[0].replace("/dev/", "")
             else:
                 key = ("physicalview.txt_headers" if mode == "2cols" 
                        else "physicalview.txt_vg_headers")
@@ -76,25 +76,21 @@ class PhysicalViewPage(Page):
         '''
         body = self._snippets.get("PV_INFO")
         
-        gvs = self._diskInfo.getPhysLVM()
+        gvs = self._diskInfo._lvmVGs
         if len(gvs) == 0:
             content = self._snippets.get("PV_NO_GV")
         else:
             content = ""
             template = self._snippets.get("PV_TABLE")
-            title = self._session.getConfig("physicalview.txt_title_volume_group")
+            #title = self._session.getConfig("physicalview.txt_title_volume_group")
+            self._tableRows = []
             for gv in gvs:
-                cols = self.autoSplit(gv)
-                if len(cols) > 1:
-                    info = self.autoSplit(cols[1])
-                    if type(info[0]) is str:
-                        info = [info]
-                    self._tableRows = info
-                    title2 = title.replace("{{vg_name}}", cols[0])
-                    template2 = template.replace("{{title}}", title2)
-                    table = self.buildTable(self, "2cols")
-                    template2 = template2.replace("{{TABLE}}", table)
-                    content += template2
+                (name, size) = gv.split(":")
+                row = [name, self.humanReadableSize(1024 * 1024 * int(size))]
+                self._tableRows.append(row)
+            content2 = self.buildTable(self, "2cols")
+            content = template.replace("{{TABLE}}", content2)
+            
         body = body.replace("{{INFO_VG}}", content)
         
         self._tableRows = self._diskInfo.getFreePV(True)

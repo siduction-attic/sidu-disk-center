@@ -12,14 +12,14 @@ MAIN:
 		</td>
 		<td>
 			<select name="partman" size="1">
-			{{overview.OPT_PARTMAN}}
+			{{body_partman}}
 			</select>
 		</td>
 		<td class="col_label">{{overview.txt_disk}}:
 		</td>
 		<td>
 			<select name="disk" size="1">
-			{{overview.OPT_DISK}}
+			{{body_disk}}
 			</select>
 		</td>
 		<td>
@@ -32,8 +32,6 @@ MAIN:
 </div>
 </div>
 <div class="textblock">
-<p>{{overview.txt_intro_info}}
-</p>
 {{INFO}}
 </div>
 </div> <!-- text_area-->
@@ -51,6 +49,7 @@ INFO_TABLE:
 	</tr>
 	{{overview.ROWS_PARTINFO}}
 </table>
+
 WAIT_FOR_PARTINFO:
 <div class="textblock warning">
 {{overview.txt_no_info}}

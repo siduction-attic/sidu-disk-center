@@ -1,0 +1,36 @@
+MAIN:
+<div id="text_area">
+<h1>{{wait.txt_wait}}</h1>
+<div class="textblock">
+{{intro}}
+</div>
+{{DESCRIPTION}}
+{{PROGRESS}}
+<div class="textblock center">
+<input type="submit" name="button_cancel" value="{{wait.txt_cancel}}" />
+</div>
+</div>
+
+PROGRESS:
+<div class="textblock center"><!-- progress -->
+	<br/>
+	<div class="wait_progress_frame">
+	<div class="wait_progress" style="width:{{width}}%">{{percentage}}%
+	</div>
+	</div>
+<div class="progress_state">{{wait.progress_state}} {{task}}</div>
+{{DEMO_TEXT}}
+	<br/>
+</div><!-- progress -->
+
+DESCRIPTION:
+<div class="textblock">
+{{txt_description}}
+</div>
+
+WARNING:
+<div class="textblock warning">
+{{txt_description}}
+</div>
+
+END:

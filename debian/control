@@ -13,7 +13,7 @@ Architecture: all
 Depends: ${misc:Depends},
    python (>= 2.7),
    python-support (>= 0.90),
-   sidu-base (>= 0.4.8)
+   sidu-base (>= 2013.11.20)
 Description: Browser based tool for handling of partitions.
  Includes the possibility to manage LVM media.
  This is the second implementation, done in Python

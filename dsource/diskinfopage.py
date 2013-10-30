@@ -3,16 +3,17 @@ Created on 31.03.2013
 
 @author: hm
 '''
-import os.path, re
+import os.path, re, time
 from webbasic.page import Page, PageException
 from basic.shellclient import SVOPT_BACKGROUND
+from util.util import Util
 
 class PartitionInfo:
     '''the info of one partition
     '''
     def __init__(self, parent, dev, label, size, size2, ptype, pinfo, fs, info):
         '''Constructor.
-        @param parent: an instance of DiskInfo 
+        @param parent: an instance of VirtualDisk 
         '''
         self._parent = parent
         # e.g. sda1
@@ -33,10 +34,12 @@ class PartitionInfo:
         self._filesystem = fs
         # additional info
         self._info = info
-        # size in MByte
-        self._megabytes = size / 1000
+        # size in MiByte
+        self._mibytes = size / 1024
         # size and unit, e.g. 11GB
         self._size = size2
+        # flavour, arch, version
+        self._osInfo = ("nox", "32", "13.2");
         
     def canBeRoot(self, minSize):
         '''Tests whether the partition can be used as root partition
@@ -44,7 +47,7 @@ class PartitionInfo:
         @return: True: can be used as root partition<br>
                 False: otherwise
         '''
-        rc = self._megabytes >= minSize
+        rc = self._mibytes >= minSize
         if rc:
             if self._partInfo == "Microsoft basic data":
                 rc = False
@@ -52,17 +55,27 @@ class PartitionInfo:
                 rc = False    
         return rc
 
-class DiskInfo:
-    '''Stores the info about a disk (a container of partitions)
+class VirtualDisk:
+    '''Stores the info about a container of partitions.
+    This can be a physical disk or a logical volume.
     '''
-    def __init__(self, dev, size, info = None):
+    def __init__(self, dev, size, info = None, attr = None,
+                 primaries = 0, nonPrimaries = 0, pType = None):
         '''Constructor.
-        @param dev: the device name
-        @param size: the size in kiByte
+        @param dev:          the device name
+        @param size:         the size in kiByte
+        @param label:        the label of the disk
+        @param primaries:    count of primary partitions
+        @param nonPrimaries: count of non primary partitions
+        @param pType:        gpt or msdos
         '''
         self._device = dev
-        self._size = size
+        self._size = int(size)
         self._info = info
+        self._attr = attr
+        self._primaries = primaries
+        self._nonPrimaries = nonPrimaries
+        self._class = pType
         
 class DiskInfoPage(Page):
     '''
@@ -82,34 +95,60 @@ class DiskInfoPage(Page):
         self._hasInfo = False
         self._parentPage = parentPage
         self._parentName = parentPage._name
-        self._gptDisks = ''
         self._partitions = {}
         self._partitionList = []
         self._disks = {}
+        # not existing partitions, e.g. "sdc!3-2048-18000"
+        self._emptyPartitions = []
         self._markedLVM = []
-        self._physicalVolumes = []
         self._freePV = []
-        self._volumeGroups = []
+        self._volumeGroups = {}
+        self._lvmVGs = [];
         self._filePartInfo = session.getConfigWithoutLanguage(
                 'diskinfo.file.demo.partinfo')
         if self._filePartInfo == "" or not os.path.exists(self._filePartInfo):
             self._filePartInfo = session.getConfigWithoutLanguage(
                     'diskinfo.file.partinfo')
         self._hasInfo = os.path.exists(self._filePartInfo)
+        self._fnPending = self._filePartInfo + ".pending"
         if self._hasInfo:
+            self._session.deleteFile(self._fnPending)
             self.importPartitionInfo()
         else:
-            answer = self._filePartInfo
-            options = SVOPT_BACKGROUND
-            command = "sdc_partinfo"
-            params = None
-            session._shellClient.execute(answer, options, command, params, 0)
-    
+            if not os.path.exists(self._fnPending):
+                self.buildInfoFile()
+            else:
+                now = time.time()
+                ftime = os.path.getctime(self._fnPending)
+                if now - ftime > 30:
+                    self.buildInfoFile()
+
     def reload(self):
         '''The partition info will be requested again.
         '''
-        self._session.deleteFile(self._filePartInfo)
+        fnPending = self._filePartInfo + ".pending"
+        buildIt = False
+        if not os.path.exists(fnPending):
+            buildIt = True
+        else:
+            ftime = os.path.getctime(fnPending)
+            if time.time() - ftime > 30:
+                
+                buildIt = True
+        if buildIt:
+            self.buildInfoFile()
 
+    def buildInfoFile(self):
+        '''Send a request to the shellserver for building a partition info file.
+        '''
+        self._session.deleteFile(self._filePartInfo)
+        Util.writeFile(self._fnPending);
+        answer = self._filePartInfo
+        options = SVOPT_BACKGROUND
+        command = "sdc_partinfo"
+        params = self._fnPending
+        self._session._shellClient.execute(answer, options, command, params, 
+            0, False)
         
     def defineFields(self):
         '''Defines the fields of the page.
@@ -147,7 +186,7 @@ class DiskInfoPage(Page):
     def importPartitionInfo(self):
         '''Gets the data of the partition info and put it into into the user data.
         '''
-        self._session.trace('DiskInfo.importPartitionInfo()')
+        self._session.trace('diskinfo.importPartitionInfo()')
         excludes = self._session.getConfigWithoutLanguage('diskinfo.excluded.dev')
         rexprExcludes = re.compile(excludes)
         diskList = ''
@@ -156,35 +195,42 @@ class DiskInfoPage(Page):
             for line in fp:
                 no += 1
                 line = line.strip()
-                if line.startswith("!GPT="):
-                    self._gptDisks = line[5:]
+                if line.startswith("!labels="):
+                    self._labels = self.autoSplit(line[8:])
                 elif line.startswith("!VG="):
-                    self._lvmVGs = line[4:]
-                elif line.startswith("PhLVM:"):
-                    self._physicalVolumes = self.autoSplit(line[6:], True)
-                elif line.startswith("FreeLVM:"):
-                    self._freePV = self.autoSplit(line[8:], True)
-                elif line.startswith("MarkedLVM:"):
-                    self._markedLVM = self.autoSplit(line[10:], True)
-                elif line.startswith("LogLVM:"):
+                    line = line[4:]
+                    if line.find(":") > 0:
+                        self._lvmVGs =  self.autoSplit(line, True);
+                        for vg in self._lvmVGs:
+                            (name, size) = vg.split(":")
+                            # size is in MiByte. Convert to KiByte:
+                            self._disks[name] = VirtualDisk(name, int(size),
+                                 "", "LVM-VG")
+                            self._volumeGroups[name] = size
+                elif line.startswith("!FreeLVM:"):
+                    self._freePV = self.autoSplit(line[9:], True)
+                elif line.startswith("!MarkedLVM:"):
+                    self._markedLVM = self.autoSplit(line[11:], True)
+                elif line.startswith("!VgLVM:"):
                     pass
-                elif line.startswith("VgLVM:"):
-                    self._volumeGroups = self.autoSplit(line[6:], True)
+                elif line.startswith("!SnapLVM:"):
+                    pass
                 elif line.startswith("!LV="):
                     self._lvmLVs = line[4:]
-                    for lvm in self._lvmVGs.split(";"):
-                        lvm += "/"
-                        self._disks[lvm] = DiskInfo(lvm, -1, "LVM-VG")
+                elif line.startswith("!GapPart="):
+                    self._emptyPartitions = self.autoSplit(line[9:], True)
+                elif line.startswith("!phDisk="):
+                    disks = self.autoSplit(line[8:], True)
+                    for info in disks:
+                        (dev, size, pType, prim, ext, attr, model) = info.split(";");
+                        self._disks[dev] = VirtualDisk(dev, size, model, attr,
+                            prim, ext, pType)
+                elif line.startswith("!osinfo="):
+                    self._osInfo = line[8:].split(";")
                 else:
                     cols = line.split('\t')
                     dev = cols[0].replace('/dev/', '')
                     if line == "" or rexprExcludes.search(dev):
-                        continue
-                    if len(cols) == 2:
-                        # Disks
-                        kByte = cols[1]
-                        self._disks[dev] = DiskInfo(dev, int(kByte))
-                        diskList += '/dev/' + dev + " (MBR)"
                         continue
                     infos = {}
                     for ix in xrange(len(cols)):
@@ -203,7 +249,7 @@ class DiskInfoPage(Page):
                     
                     date = ''
                     if 'created' in infos:
-                        date = (self._session.getConfig('diskinfo.created') 
+                        date = " " + (self._session.getConfig('diskinfo.created') 
                             + ': ' + infos['created'])
                     if 'modified' in infos:
                         date += (' ' + self._session.getConfig('diskinfo.modified') 
@@ -216,7 +262,7 @@ class DiskInfoPage(Page):
                         info = os
                     if date != '':
                         info += date
-                    size2 = self.humanReadableSize(int(size))
+                    size2 = self.humanReadableSize(int(size)*1024)
                     self._partitions[dev] = PartitionInfo(self._partitions, 
                         dev, label, int(size), size2, ptype, pinfo, fs, info)
                     self._partitionList.append(self._partitions[dev])
@@ -257,17 +303,30 @@ class DiskInfoPage(Page):
         for ix in xrange(len(rc)):
             rc[ix] = rc[ix]._device
         return rc
-            
-    def hasGPT(self, disk):
-        '''Returns whether a given disk has a GPT (instead of a MBR).
-         @param dev: disk to test, e.g. sda
-         @return True: the disk has a GPT<br>
+     
+    def getDiskOfPartition(self, partition):
+        '''Returns the disk of a given partition.
+        @param partition: the partition to inspect
+        @return None: No disk recognized
+                otherwise: the disk containing the partition
+        '''
+        rc = None
+        matcher = re.match(r"(sd[a-z])\d", partition)
+        if matcher != None:
+            rc = matcher.group(1)
+        return rc
+              
+    def hasGPT(self, partition):
+        '''Returns whether a given partition lies on a GPT disk.
+         @param partition: partition to test, e.g. sda2
+         @return True: the partition is on a GPT disk<br>
              False: otherwise
         '''
-        rc = self._gptDisks.find(disk) >= 0
+        disk = self._disks[self.getDiskOfPartition(partition)]
+        rc = disk._attr.find("gpt") >= 0
         return rc
 
-    def buildPartOfTable(self, disk, what, ixRow = None):
+    def buildPartOfTable(self, info, what, ixRow = None):
         '''
         @param info:  not used
         @param what:  names a part of the table which will be returned
@@ -304,7 +363,7 @@ class DiskInfoPage(Page):
         for partition in partitions:
             self._currentRows.append((partition._device, partition._label,
                 partition._size, partition._partType, partition._filesystem,
-                partition._info))
+                "<xml>" + partition._info))
         try:
             table = self.buildTable(self, disk)
         except PageException as exc:
@@ -328,8 +387,12 @@ class DiskInfoPage(Page):
         disks.sort()
         for name in disks:
             disk = self._disks[name]
+            attr = disk._class if disk._class != None else ""
+            if disk._attr != None:
+                attr += " " + disk._attr
             self._currentRows.append((disk._device, 
-                    self.humanReadableSize(disk._size) if disk._size > 0 else "",
+                    self.humanReadableSize(disk._size*1024*1024) if disk._size > 0 else "",
+                    attr,
                     disk._info if disk._info != None else ""))
         try:
             table = self.buildTable(self, disk)
@@ -349,6 +412,7 @@ class DiskInfoPage(Page):
         else:
             if state == None or state not in ["NO", "PART", "DISK"]:
                 state = "NO"
+            # INFO_PART or INFO_DISK
             content = self._snippets.get("INFO_" + state)
             content = content.replace("{{STATE_SWITCH}}", 
                 self._snippets.get("STATE_SWITCH"))
@@ -372,7 +436,8 @@ class DiskInfoPage(Page):
         '''
         rc = ["-"]
         minSize = int(self._session.getConfigWithoutLanguage(
-            "diskinfo.root.minsize.mb"))
+            "diskinfo.root.minsize.mb." 
+            + self._osInfo[0]))
         for partition in self._partitionList:
             if partition.canBeRoot(minSize):
                 dev = partition._device
@@ -396,9 +461,9 @@ class DiskInfoPage(Page):
         @return: list of disk names
         '''
         rc = []
-        for disk in self._disks:
-            if not disk.endswith("/"):
-                rc.append(disk)
+        for disk in self._disks.itervalues():
+            if disk._class != None and disk._class != "":
+                rc.append(disk._device)
         rc.sort()
         return rc
     
@@ -441,7 +506,115 @@ class DiskInfoPage(Page):
             rc = self._snippets.get("WAIT_FOR_INFO")
             self._parentPage.setRefresh(3)
         return rc
+
+    def getDisksWithSpace(self):
+        '''Returns a list of drives containing free space for automatic partitioning
+        @return: a list of dictionaries (name, list of partinfo), 
+                 e.g. [{"sda" : [<sda1>, <sda2>]}, {"sdb" : [<sdb!>]
+        '''
+        rc = []
+        disks = {}
+        rexpr = re.compile("([a-z]+)\\d")
+        for dev in self._partitionList:
+            if dev._device.find("/") < 0 and (dev._partType == "" or dev._partType == "0"):
+                matcher = rexpr.match(dev._device)
+                if matcher != None:
+                    disk = matcher.group(1)
+                    if not disk in disks:
+                        disks[disk] = []
+                    disks[disk].append(dev)
+        for disk in sorted(disks.keys()):
+            item = {}
+            item[disk] = disks[disk]
+            rc.append(item)
+        return rc
       
+    def buildFreePartitionTable(self, disk = None):
+        '''Builds a table containing checkboxes for each free space of disks.
+        @param disk:     None: all disks
+                         only partitions of this disk will be used, e.g. sda
+        @return: a 5 column table containing the checkboxes
+        '''
+        self._currentTableTemplate = self._snippets.get("TABLE_FREEPART")
+        colsOfLine = None
+        ix = -1;
+        self._currentRows = []
+        boxTemplate = "<xml>" + self._snippets.get("CHECKBOX_PART")
+        for item in self._emptyPartitions:
+            info = item.split('-')
+            name = info[0]
+            if disk == None or name.startswith(disk):
+                ix += 1
+                if ix % 5 == 0:
+                    if colsOfLine != None:
+                        self._currentRows.add(colsOfLine)
+                    colsOfLine = []
+                box = boxTemplate.replace("{{no}}", str(ix))
+                box = box.replace("{{name}}", info[0].replace("!", ""))
+                sectorFrom = int(info[1])
+                sectorTo = int(info[2])
+                size = self.humanReadableSize((sectorTo - sectorFrom)*512)
+                box = box.replace("{{size}}", size)
+                box = box.replace("{{from}}", self.humanReadableSize(sectorFrom*512, 1))
+                box = box.replace("{{to}}", self.humanReadableSize(sectorTo*512, 1))
+                colsOfLine.append(box)
+        ix += 1
+        while ix % 5 != 0:
+            colsOfLine.append("<xml>&nbsp;")
+            ix += 1
+        if colsOfLine == None:
+            colsOfLine = []
+        self._currentRows.append(colsOfLine)
+        body = self.buildTable(self, None)
+        return body
+    
+    def buildFreePartitionComboBox(self, comboName):
+        '''Builds a combobox for each free space of on  disks.
+        @param comboName:     the name of the field
+        @return: a combobox definition (HTML)
+        '''
+        names = []
+        values = []
+        for item in self._emptyPartitions:
+            info = item.split('-')
+            name = info[0].replace("!", "")
+            values.append(name)
+            sectorFrom = int(info[1])
+            sectorTo = int(info[2])
+            size = self.humanReadableSize((sectorTo - sectorFrom)*512, 1)
+            text = "{:s} {:s} [{:s}-{:s}]".format(name, size,
+                self.humanReadableSize(sectorFrom*512, 1),
+                self.humanReadableSize(sectorTo*512, 1))
+            names.append(text)
+        body = self._snippets.get("COMBO_FREEPART")
+        body = body.replace("!name!", comboName)
+        body = self.fillDynamicSelected(comboName, names, values, body, 
+                self._parentPage)
+        return body
+    
+    def buildProgress(self, fileProgress = None):
+        '''Returns a HTML snippet with the progress bar.
+        '''
+        if fileProgress == None:
+            fileProgress = self._fnPending
+        body = self._snippets.get("PROGRESS")
+        if os.path.exists(fileProgress):
+            body = self._snippets.get("PROGRESS")
+            (percentage, task, no, count) = self._session.readProgress(fileProgress)
+        else:
+            (percentage, task, no, count) = (5, "initialization", 1, 5)
+        if task == None:
+            task = ""
+        translationKey = None
+        if task != "" and translationKey != None:
+            task = self.translateTask(translationKey, task)
+        body = body.replace("{{percentage}}", unicode(percentage))
+        body = body.replace("{{width}}", unicode(percentage))
+        body = body.replace("{{task}}", task)
+        body = body.replace("{{no}}", unicode(no))
+        body = body.replace("{{count}}", unicode(count))
+        return body
+    
     def listOfFirst(self, source):
         '''Returns a list built from a list of autosplit strings.
         The first item of each source element will be taken.
@@ -467,7 +640,23 @@ class DiskInfoPage(Page):
                 cols[0] = cols[0].replace("/dev/", "")
             rc.append(cols)
         return rc
-    
+
+    def buildDevSize(self, devs):
+        '''Builds a list of tuples (<dev>, <size>).
+        @param devs:    a list of device names
+        @return:        a list of tuples 
+                        e.g. [("sda1", "4GiB"), ("sdb3", "2MiB")]
+        '''
+        rc = []
+        for pv in devs:
+            if pv in self._partitions:
+                size = self._partitions[pv]._size
+            else:
+                size = 0
+            cols = (pv, size)
+            rc.append(cols)
+        return rc
+
     def getMarkedPV(self, fullInfo = False):
         '''Returns the names of the partitions with partition type 0x8e.
         @param fullInfo:    False: only the name will be returned
@@ -475,9 +664,9 @@ class DiskInfoPage(Page):
         @return: a list of names, e.g. [sdc1, sdc2]
         '''
         if not fullInfo:
-            rc = self.listOfFirst(self._markedLVM)
+            rc = self._markedLVM
         else:
-            rc = self.listOfFull(self._markedLVM)
+            rc = self.buildDevSize(self._markedLVM)
         return rc
 
     def getFreePV(self, fullInfo = False):
@@ -488,16 +677,16 @@ class DiskInfoPage(Page):
                  or a list of tuples: [("sdc1", "4G"), ("sdc3", "2G")]
         '''
         if not fullInfo:
-            rc = self.listOfFirst(self._freePV)
+            rc = self._freePV
         else:
-            rc = self.listOfFull(self._freePV)
+            rc = self.buildDevSize(self._freePV)
         return rc
 
     def getVolumeGroups(self):
         '''Returns a list of the names of the volume groups.
         @return: a list of the names of the volume groups
         '''
-        rc = self.listOfFirst(self._volumeGroups)
+        rc = self._volumeGroups.keys()
         return rc
     
     def listOfFirstOfVG(self, vg, source):
@@ -507,10 +696,9 @@ class DiskInfoPage(Page):
             rc.append(names[0].replace("/dev/", ""))
         return rc
       
-    def getPhysLVM(self):
-        '''Returns the list of infos about the VGs.
-        @return a list of the VGs
+    def getOsInfo(self):
+        '''Returns info about the current os.
+        @return: (<flavour>, <arch>, <version>)
         '''
-        return self._physicalVolumes
-            
+        return self._osInfo;
             

@@ -30,8 +30,11 @@ case "$CMD" in
 		$X $CMD "$PARAM" "$PARAM2" >>$TEMP1 2>&1
 		;;
 	lvcreate)
+		# --size size --name lv vg fs label
 		LV=$PARAM4
 		VG=$PARAM5
+		FS=$PARAM6
+		LABEL=$PARAM7
 		$X $CMD $PARAM $PARAM2 $PARAM3 $LV $VG >>$TEMP1 2>&1
 		if [ "$PARAM6" == 'swap' ] ; then
 			if [ "$PARAM7" != "" ] ; then
@@ -39,12 +42,12 @@ case "$CMD" in
 			fi
 			date "+%Y.%m.%d/%H:%M: mkswap -f $PARAM7 /dev/$VG/$LV " >>$TEMP1
 			$X mkswap -f $PARAM7 /dev/$VG/$LV >>$TEMP1 2>&1
-		elif [ "$PARAM6" != "-" ] ; then
-			if [ "$PARAM7" != "" ] ; then
-				PARAM7="-L $PARAM7"
+		elif [ "$FS" != "-" ] ; then
+			if [ "$LABEL" != "" ] ; then
+				LABEL="-L $LABEL"
 			fi
-			date "+%Y.%m.%d/%H:%M: mkfs.$PARAM6 $PARAM7 /dev/$VG/$LV " >>$TEMP1
-			$X mkfs.$PARAM6 $PARAM7 /dev/$VG/$LV >>$TEMP1 2>&1
+			date "+%Y.%m.%d/%H:%M: mkfs.$FS $LABEL /dev/$VG/$LV " >>$TEMP1
+			$X mkfs.$FS $LABEL /dev/$VG/$LV >>$TEMP1 2>&1
 		fi
 		;;
 	sncreate)
