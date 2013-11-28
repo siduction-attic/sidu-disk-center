@@ -1,3 +1,10 @@
+sidu-disk-center (2013.11.28) unstable; urgency=low
+
+  * .gitignore modified
+  * debian/install modified
+
+ -- Alf Gaida <agaida@siduction.org>  Thu, 28 Nov 2013 03:05:40 +0100
+
 sidu-disk-center (2013.11.20) unstable; urgency=low
 
   * refactoring of sdc_partinfo.pl: equal to partinfo.pl
