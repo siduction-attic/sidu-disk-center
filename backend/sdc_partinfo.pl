@@ -75,6 +75,9 @@ system ("./automount-control.sh enabled");
 
 my ($refExecs, $refLogs) = basic::GetVars();
 recorder::Finish("execLines", $refExecs, "logLines", $refLogs);
+if ($s_testRun){
+	&finishTest;
+}
 exit 0;
 
 # ===
@@ -183,8 +186,10 @@ sub JoinPhysicalDiskInfo{
 sub GetSiduInfo{
     my $info = &recorder::FirstLineOf("/etc/siduction-version");
     # siduction 11.1 One Step Beyond - kde - 
-    die $info unless $info =~ /^\S+\s+([.\d]+)\s.*-\s+(\w+) -/;
-    my ($version, $flavour) = ($1, $2);
+    my ($version, $flavour) = ("x.y", "z");
+    if ($info =~ /^\S+\s+([.\drc]+)\s.*-\s+(\w+) -/){
+        ($version, $flavour) = ($1, $2);
+    }
     # Linux version 3.7-8.towo-siduction-amd64 (Debian 3.7-14)...
     $info = &recorder::FirstLineOf("/proc/version");
     my $arch = $info =~ /amd64/ ? "64" : "32";

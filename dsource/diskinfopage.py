@@ -395,7 +395,7 @@ class DiskInfoPage(Page):
                     attr,
                     disk._info if disk._info != None else ""))
         try:
-            table = self.buildTable(self, disk)
+            table = self.buildTable(self, disks)
         except PageException as exc:
             self._session.error("buildDiskInfoTable: {:s}", 
                 exc.message)
