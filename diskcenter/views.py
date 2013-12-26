@@ -9,6 +9,7 @@ from dsource.physicalview import PhysicalViewPage
 from dsource.logicalview import LogicalViewPage
 from dsource.snapshots import SnapshotsPage
 from webbasic.waitpage import WaitPage
+from util.util import Util
 
 def getSession(request):
     homeDir = request.documentRoot if hasattr(request, "documentRoot") else None
@@ -34,7 +35,8 @@ def handlePage(page, request, session):
         rc = HttpResponse(body)
     else:
         url = pageResult._url
-        session.trace('redirect to {:s} [{:s}]'.format(url, pageResult._caller))
+        session.trace(u'redirect to {:s} [{:s}]'.format(
+            Util.toUnicode(url), pageResult._caller))
         absUrl = session.buildAbsUrl(url)
         rc = HttpResponsePermanentRedirect(absUrl) 
     cookies =  request.COOKIES

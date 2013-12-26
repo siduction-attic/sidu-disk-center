@@ -1,3 +1,9 @@
+sidu-disk-center (2013.12.26) unstable; urgency=low
+
+  * *.conf: sorted by key
+
+ -- J. Hamatoma <hama@siduction.net>  Thu, 26 Dec 2013 23:39:07 +0100
+
 sidu-disk-center (2013.12.20.1) unstable; urgency=low
 
   * crash while showing the disk info

@@ -809,7 +809,7 @@ sub PhysicalView{
 	} 
 	&Out("!FreeLVM:$out");
 	$out = '';
-	my @sorted = SortDevNames(keys %s_hasLVMFlag);
+	@sorted = SortDevNames(keys %s_hasLVMFlag);
 	for $key (@sorted){
 	    next if $assigned{$key} || $unassigned{$key};
 		$out .= ";$key"; 

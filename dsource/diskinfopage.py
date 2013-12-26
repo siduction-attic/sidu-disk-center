@@ -608,11 +608,11 @@ class DiskInfoPage(Page):
         translationKey = None
         if task != "" and translationKey != None:
             task = self.translateTask(translationKey, task)
-        body = body.replace("{{percentage}}", unicode(percentage))
-        body = body.replace("{{width}}", unicode(percentage))
+        body = body.replace("{{percentage}}", str(percentage))
+        body = body.replace("{{width}}", str(percentage))
         body = body.replace("{{task}}", task)
-        body = body.replace("{{no}}", unicode(no))
-        body = body.replace("{{count}}", unicode(count))
+        body = body.replace("{{no}}", str(no))
+        body = body.replace("{{count}}", str(count))
         return body
     
     def listOfFirst(self, source):
