@@ -1,20 +1,7 @@
 #! /bin/bash
 set -e
 PROJECT=sidu-disk-center
-if ! grep -q "$PROJECT" /etc/hosts ; then
-	# if the last newline is missing:
-	echo "" >>/etc/hosts
-	ADDR=86
-	while grep -q "127.0.0.$ADDR" /etc/hosts ; do
-		ADDR=$(expr $ADDR + 1)
-	done
-	echo "127.0.0.$ADDR $PROJECT" >>/etc/hosts
-	echo "virtual host installed: $PROJECT ($ADDR)"
-fi
 
-# Create the links from the toolkit:
-pushd /usr/share/$PROJECT >/dev/null
-SRC=../sidu-base
 function MkLink(){
 	if [ ! -L $1 ] ; then
 		ln -sf $2/$1 $1
@@ -25,17 +12,46 @@ function MkLink2(){
 		ln -sf $1 $2
 	fi
 }
-MkLink index.php $SRC
-MkLink base $SRC
 
-# Create the links to the shellserver:
-cd /usr/share/sidu-base/backend
-SRC=../../$PROJECT/backend
-MkLink sdc_lvm.sh $SRC
-MkLink sdc_partinfo.sh $SRC
-MkLink sdc_partinfo.pl $SRC
-MkLink2 /var/cache/sidu-base/public /usr/share/$PROJECT
-MkLink2 /usr/share/siguibui/backend/automount-control.sh $SRC
-popd >/dev/null
+case "$1" in
+    configure)
+        if [ -f /etc/skel/Desktop/$PROJECT.desktop ]; then
+            chmod 755 /etc/skel/Desktop/$PROJECT.desktop
+        fi
+        if grep -q $PROJECT /etc/hosts ; then
+        	perl -pi -e "s/^.*$PROJECT.*/127.0.0.86 $PROJECT/;" /etc/hosts
+        else
+            # if the last newline is missing:
+            tail -n1 /etc/hosts | hd | grep -q "0a" || echo "" >>/etc/hosts
+            echo "127.0.0.86 $PROJECT" >>/etc/hosts
+            echo "virtual host installed: $PROJECT (127.0.0.86)"
+        fi
+	
+		# Create the links from the toolkit:
+		pushd /usr/share/$PROJECT >/dev/null
+		SRC=../sidu-base
+		MkLink index.php $SRC
+		MkLink base $SRC
+		
+		# Create the links to the shellserver:
+		cd /usr/share/sidu-base/backend
+		SRC=../../$PROJECT/backend
+		MkLink sdc_lvm.sh $SRC
+		MkLink sdc_partinfo.sh $SRC
+		MkLink sdc_partinfo.pl $SRC
+		MkLink2 /var/cache/sidu-base/public /usr/share/$PROJECT
+		MkLink2 /usr/share/siguibui/backend/automount-control.sh $SRC
+		popd >/dev/null
+	    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    	;;
+
+	*)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+	
 #DEBHELPER#
 exit 0

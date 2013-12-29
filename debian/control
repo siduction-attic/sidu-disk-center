@@ -3,7 +3,9 @@ Section: utils
 Priority: extra
 Maintainer: J. Hamatoma <hama@siduction.net>
 Uploaders: Alf Gaida <agaida@siduction.org>
-Build-Depends: debhelper (>= 9)
+Build-Depends:
+ debhelper (>= 9)
+ dh-systemd,
 Standards-Version: 3.9.4
 Vcs-git: git://git.siduction.org:code/sidu-disk-center
 Vcs-Browser: http://git.siduction.org/?p=code/sidu-disk-center.git
@@ -13,7 +15,8 @@ Architecture: all
 Depends: ${misc:Depends},
    python (>= 2.7),
    python-support (>= 0.90),
-   sidu-base (>= 2013.11.20)
+   sidu-base (>= 2014.02.10),
+   pywwetha (>=2014.02.10)
 Description: Browser based tool for handling of partitions.
  Includes the possibility to manage LVM media.
  This is the second implementation, done in Python
