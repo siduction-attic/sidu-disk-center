@@ -1,3 +1,9 @@
+sidu-disk-center (2013.12.27) unstable; urgency=low
+
+  * adaption to sidu-base 2013.12.27: name of the prev/next button makros
+
+ -- J. Hamatoma <hama@siduction.net>  Sun, 29 Dec 2013 10:25:24 +0100
+
 sidu-disk-center (2013.12.26) unstable; urgency=low
 
   * *.conf: sorted by key
