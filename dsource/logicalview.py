@@ -94,7 +94,16 @@ class LogicalViewPage(Page):
             content = self.fillStaticSelected("create_lv_fs", content)
             content = self.fillStaticSelected("create_lv_unit", content)
         elif action == "delete_lv":
-            content = self._snippets.get("DEL_LV")
+            delCommand = self._session.getUserData(self._name, "del_command")
+            if delCommand == None or delCommand == "":
+                content = self._snippets.get("DEL_LV")
+                vg = self.getField("volume_group")
+                lvs = self._diskInfo.getPartitionNamesOfDisk(vg)
+                content = self.fillDynamicSelected("del_lv_lv", lvs, lvs, content)
+            else:
+                content = self._snippets.get("DEL_OUTPUT")
+                self._session.setLocalVar("del_command", delCommand)
+                self._session.putUserData(self._name, "del_command", "")
         else:
             self._session.error("unknown action: " + action)
         body = body.replace("{{ACTION}}", content)
@@ -131,7 +140,7 @@ class LogicalViewPage(Page):
         options = SVOPT_BACKGROUND
         self.execute(answer, options, program, params, 0)
         prog = " ".join(params)
-        rc = self.gotoWait("physicalview", answer, None, None, [prog])
+        rc = self.gotoWait("logicalview", answer, None, None, [prog])
         if doReload:
             self._diskInfo.reload()
         return rc
@@ -139,7 +148,6 @@ class LogicalViewPage(Page):
     def createLV(self):
         '''Creates a logical volume.
         '''
-        self.addField("del_lv_lv")
         params = ["lvcreate"]
         unit = self.getField("create_lv_unit")
         value = self.getField("create_lv_size")
@@ -160,6 +168,18 @@ class LogicalViewPage(Page):
         self.putField("create_lv_label", None)
         self.work(params, True)
         
+    def deleteLV(self):
+        '''Delete a logical volume.
+        '''
+        name = self.getField('del_lv_lv');
+        if name == "":
+            self.putError(None, "logicalview.err_no_lv_selected")
+        #elsif self.hasAnySnapshot(name):
+        #    self.error
+        else:
+            command = "lvremove -f " + name
+            self._session.putUserData("logicalview", "del_command", command)
+
     def handleButton(self, button):
         '''Do the actions after a button has been pushed.
         @param button: the name of the pushed button
@@ -174,7 +194,7 @@ class LogicalViewPage(Page):
         elif button == "button_reload":
             pass
         elif button == "button_del_lv":
-            pass
+            self.deleteLV()
         elif button == "button_next":
             pageResult = self._session.redirect(
                 self.neighbourOf(self._name, False), 

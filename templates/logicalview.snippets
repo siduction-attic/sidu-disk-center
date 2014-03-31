@@ -14,11 +14,11 @@ MAIN:
  </select>
  </td>
  <td>
-	<input type="submit" name="button_action" value="{{logicalview.txt_button_action}}"/>
+	<input class="hidden" type="submit" name="button_action" value="{{logicalview.txt_button_action}}"/>
  </td>
  </tr>
  <tr><td colspan="2">{{logicalview.txt_volume_group}}</td>
-  <td><select name="volume_group">
+  <td><select name="volume_group" onchange="autoClick('button_action');">
 {{body_volume_group}}
        </select>
   </td>
@@ -66,7 +66,7 @@ DEL_LV:
  <td colspan="2">{{logicalview.txt_del_lv_lv}}
  </td>
  <td colspan="2"><select name="del_lv_lv">
-{{opt_del_lv_lv}}
+{{body_del_lv_lv}}
    </select>
  </td>
  <td><input type="submit" name="button_del_lv" value="{{logicalview.txt_button_del_lv}}"/>
@@ -87,7 +87,7 @@ DEL_OUTPUT:
 {{logicalview.txt_del_description}}
 </div>
 <pre>
-{{logicalview.txt_del_command}}
+{{del_command}}
 </pre>
 </td>
 

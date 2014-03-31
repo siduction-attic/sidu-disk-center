@@ -1,7 +1,7 @@
 #! /usr/bin/perl
 # Gets the partition info.
-# @param fnProgress name of the file containing progress info
 # @param answer     the partition info 
+# @param fnProgress name of the file containing progress info
 # @param testRun	"": normal run otherwise: name of the test
 #
 use strict;
@@ -807,14 +807,14 @@ sub PhysicalView{
 	for $key (@sorted){
 		$out .= ";$key"; 
 	} 
-	&Out("!FreeLVM:$out");
+	&Out("!FreeLVM=$out");
 	$out = '';
 	@sorted = SortDevNames(keys %s_hasLVMFlag);
 	for $key (@sorted){
 	    next if $assigned{$key} || $unassigned{$key};
 		$out .= ";$key"; 
 	} 
-	&Out("!MarkedLVM:$out");
+	&Out("!MarkedLVM=$out");
 }
 
 # ===
@@ -863,7 +863,7 @@ sub LogicalView{
 	foreach $key (@sorted){
 		$out .= "\f\t$key" . $snaps{$key}; 
 	}
-	&Out("!SnapLVM:$out");
+	&Out("!SnapLVM=$out");
 }
 # ===
 # Prepares the data for the volume group
@@ -899,7 +899,7 @@ sub VgInfo {
 		$out .= "\t|$key" . $vgs{$key}; 
 	}
 	if ($out ne ""){
-		&Out("!VgLVM:$out");
+		&Out("!VgLVM=$out");
 	}
 }
 

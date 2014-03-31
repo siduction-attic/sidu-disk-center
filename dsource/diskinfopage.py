@@ -8,6 +8,8 @@ from webbasic.page import Page, PageException
 from basic.shellclient import SVOPT_BACKGROUND
 from util.util import Util
 
+VIRT_RAID_DISK = "(mdraid)"
+COMMAND = "sdc_partinfo"
 class PartitionInfo:
     '''the info of one partition
     '''
@@ -63,8 +65,9 @@ class VirtualDisk:
                  primaries = 0, nonPrimaries = 0, pType = None):
         '''Constructor.
         @param dev:          the device name
-        @param size:         the size in kiByte
-        @param label:        the label of the disk
+        @param size:         the size in MiByte
+        @param info:         additional info about filesys...
+        @param attr:         attributes like LVM_VG
         @param primaries:    count of primary partitions
         @param nonPrimaries: count of non primary partitions
         @param pType:        gpt or msdos
@@ -76,6 +79,19 @@ class VirtualDisk:
         self._primaries = primaries
         self._nonPrimaries = nonPrimaries
         self._class = pType
+        self._primaries = 0
+        self._nonPrimaries = 0
+        self._class = ""
+        
+    def addInfo(self, primaries, nonPrimaries, aClass ):
+        '''Adds additional infos.
+        @param primaries:    count of primary partitions
+        @param nonPrimaries: count of non primary partitions
+        @param aClass:       gpt or msdos
+        '''
+        self._primaries = primaries
+        self._nonPrimaries = nonPrimaries
+        self._class = aClass
         
 class DiskInfoPage(Page):
     '''
@@ -93,6 +109,7 @@ class DiskInfoPage(Page):
         
         session = self._session = parentPage._session
         self._hasInfo = False
+        self._damaged = "";
         self._parentPage = parentPage
         self._parentName = parentPage._name
         self._partitions = {}
@@ -101,9 +118,12 @@ class DiskInfoPage(Page):
         # not existing partitions, e.g. "sdc!3-2048-18000"
         self._emptyPartitions = []
         self._markedLVM = []
+        self._physicalVolumes = []
         self._freePV = []
+        self._volumeGroupList = []
         self._volumeGroups = {}
-        self._lvmVGs = [];
+        # flavour, arch, version
+        self._osInfo = ("nox", "32", "13.2");
         self._filePartInfo = session.getConfigWithoutLanguage(
                 'diskinfo.file.demo.partinfo')
         if self._filePartInfo == "" or not os.path.exists(self._filePartInfo):
@@ -145,7 +165,7 @@ class DiskInfoPage(Page):
         Util.writeFile(self._fnPending);
         answer = self._filePartInfo
         options = SVOPT_BACKGROUND
-        command = "sdc_partinfo"
+        command = COMMAND
         params = self._fnPending
         self._session._shellClient.execute(answer, options, command, params, 
             0, False)
@@ -183,6 +203,17 @@ class DiskInfoPage(Page):
         '''
         self._session.deleteFile(self._filePartInfo)
 
+    def addRaidPartition(self, partInfo):
+        '''Adds a raid partition into the "virtual drive" mdraid.
+        @param partInfo:    instance of PartitionInfo
+        '''
+        if VIRT_RAID_DISK not in self._disks:
+            disk = VirtualDisk(VIRT_RAID_DISK, 0, "", "RAID")
+            self._disks[VIRT_RAID_DISK] = disk
+        else:
+            disk = self._disks[VIRT_RAID_DISK]
+        disk._size += partInfo._mibytes
+        
     def importPartitionInfo(self):
         '''Gets the data of the partition info and put it into into the user data.
         '''
@@ -190,33 +221,46 @@ class DiskInfoPage(Page):
         excludes = self._session.getConfigWithoutLanguage('diskinfo.excluded.dev')
         rexprExcludes = re.compile(excludes)
         diskList = ''
+        # Don't use codecs.open(): may be not UTF-8
         with open(self._filePartInfo, "r") as fp:
             no = 0
             for line in fp:
                 no += 1
-                line = line.strip()
-                if line.startswith("!labels="):
+                line = Util.toUnicode(line.strip())
+                if line.startswith("#") or line == "":
+                    pass
+                elif line.startswith("!GPT="):
+                    self._gptDisks = line[5:]
+                elif line.startswith("!labels="):
                     self._labels = self.autoSplit(line[8:])
                 elif line.startswith("!VG="):
                     line = line[4:]
                     if line.find(":") > 0:
                         self._lvmVGs =  self.autoSplit(line, True);
                         for vg in self._lvmVGs:
-                            (name, size) = vg.split(":")
-                            # size is in MiByte. Convert to KiByte:
+                            name, size = vg.split(":")
+                            # size is in MiByte:
                             self._disks[name] = VirtualDisk(name, int(size),
                                  "", "LVM-VG")
                             self._volumeGroups[name] = size
-                elif line.startswith("!FreeLVM:"):
+                elif line.startswith("!PhLVM="):
+                    self._physicalVolumes = self.autoSplit(line[7:], True)
+                elif line.startswith("!FreeLVM="):
                     self._freePV = self.autoSplit(line[9:], True)
-                elif line.startswith("!MarkedLVM:"):
+                elif line.startswith("!MarkedLVM="):
                     self._markedLVM = self.autoSplit(line[11:], True)
-                elif line.startswith("!VgLVM:"):
+                elif line.startswith("!LogLVM="):
                     pass
+                elif line.startswith("!VgLVM="):
+                    self._volumeGroupList = self.autoSplit(line[7:], True)
                 elif line.startswith("!SnapLVM:"):
                     pass
+                elif line.startswith("!osinfo="):
+                    self._osInfo = line[8:].split(";")
                 elif line.startswith("!LV="):
                     self._lvmLVs = line[4:]
+                elif line.startswith("!damaged="):
+                    self._damaged = line[9:];
                 elif line.startswith("!GapPart="):
                     self._emptyPartitions = self.autoSplit(line[9:], True)
                 elif line.startswith("!phDisk="):
@@ -225,16 +269,17 @@ class DiskInfoPage(Page):
                         (dev, size, pType, prim, ext, attr, model) = info.split(";");
                         self._disks[dev] = VirtualDisk(dev, size, model, attr,
                             prim, ext, pType)
-                elif line.startswith("!osinfo="):
-                    self._osInfo = line[8:].split(";")
-                else:
+                        if pType.lower() ==  "gpt":
+                            model = "[GPT] " + model
+                        self._disks[dev].addInfo(prim, ext, pType)
+                elif not line.startswith("!"):
                     cols = line.split('\t')
                     dev = cols[0].replace('/dev/', '')
                     if line == "" or rexprExcludes.search(dev):
                         continue
                     infos = {}
                     for ix in xrange(len(cols)):
-                        vals = cols[ix].split(':')
+                        vals = cols[ix].split(':', 1)
                         if len(vals) > 1:
                             infos[vals[0]] = vals[1]
                     size = 0 if 'size' not in infos else infos['size']
@@ -255,7 +300,7 @@ class DiskInfoPage(Page):
                         date += (' ' + self._session.getConfig('diskinfo.modified') 
                             + ': ' + infos['modified'])
                         
-                    info = subdistro if subdistro == '' else distro
+                    info = subdistro if subdistro != '' else distro
                     if info == '':
                         info = debian    
                     if info == '':
@@ -266,6 +311,8 @@ class DiskInfoPage(Page):
                     self._partitions[dev] = PartitionInfo(self._partitions, 
                         dev, label, int(size), size2, ptype, pinfo, fs, info)
                     self._partitionList.append(self._partitions[dev])
+                    if dev.startswith("md"):
+                        self.addRaidPartition(self._partitions[dev])
             fp.close()
             # strip the first separator:
             self._bootOptTarget = diskList[1:]
@@ -280,6 +327,28 @@ class DiskInfoPage(Page):
             rc = self._partitions[device].label
         return rc
 
+    def getLabel(self, dev):
+        '''Gets the label of a partition.
+        @param dev:    e.g. vertex/opt
+        @return:        "": no label exists
+                        otherwise: the label of the device
+        '''
+        label = ""
+        if dev in self._partitions:
+            label = self._partitions[dev]._label
+        return label
+    
+    def getFsSystem(self, dev):
+        '''Gets the filesystem of a partition.
+        @param dev:    e.g. vertex/opt
+        @return:        "": no filesystem exists
+                        otherwise: the filesystem of the device
+        '''
+        fs = ""
+        if dev in self._partitions:
+            fs = self._partitions[dev]._filesystem
+        return fs
+    
     def getPartitionsOfDisk(self, disk):
         '''Returns the partitions of a given disk.
         @param disk:    the name of the disk, e.g. sda
@@ -461,9 +530,11 @@ class DiskInfoPage(Page):
         @return: list of disk names
         '''
         rc = []
-        for disk in self._disks.itervalues():
-            if disk._class != None and disk._class != "":
-                rc.append(disk._device)
+        for disk in self._disks:
+            item = self._disks[disk]
+            if not (disk.endswith("/") or item._attr == "LVM-VG"
+                    or disk.startswith("(")):
+                rc.append(disk)
         rc.sort()
         return rc
     
@@ -696,6 +767,12 @@ class DiskInfoPage(Page):
             rc.append(names[0].replace("/dev/", ""))
         return rc
       
+    def getPhysLVM(self):
+        '''Returns the list of infos about the VGs.
+        @return a list of the VGs
+        '''
+        return self._physicalVolumes
+            
     def getOsInfo(self):
         '''Returns info about the current os.
         @return: (<flavour>, <arch>, <version>)

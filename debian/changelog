@@ -1,3 +1,12 @@
+sidu-disk-center (2014.03.30) unstable; urgency=medium
+
+  * unified: partinfo.txt and sdc_partinfo.txt
+  * displaying "(mdraid)" in the disk info
+  * deleting of Logical Volumes
+  * some buttons now hidden ("autoclick") 
+
+ -- J. Hamatoma <hama@siduction.net>  Mon, 31 Mar 2014 21:12:08 +0200
+
 sidu-disk-center (2014.03.07) unstable; urgency=medium
 
   * port changed to 80

@@ -41,6 +41,7 @@ class PhysicalViewPage(Page):
         self.addField("create_vg_pv")
         self.addField("create_vg_ext_size")
         self.addField("create_vg_ext_unit")
+        self.addField("del_lv_lv")
         # hidden fields:
         self.addField("answer", None, 0)
         
