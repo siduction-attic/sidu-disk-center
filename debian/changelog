@@ -1,3 +1,9 @@
+sidu-disk-center (2014.04.11) unstable; urgency=medium
+
+  * no dependency to pywwetha 
+
+ -- J. Hamatoma <hama@siduction.net>  Sat, 12 Apr 2014 13:03:54 +0200
+
 sidu-disk-center (2014.03.30) unstable; urgency=medium
 
   * unified: partinfo.txt and sdc_partinfo.txt
