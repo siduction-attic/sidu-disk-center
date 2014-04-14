@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from djinn.django.conf.urls import patterns, url
 
 from diskcenter import views
 

@@ -1,3 +1,9 @@
+sidu-disk-center (2014.04.12) unstable; urgency=medium
+
+  * djinn corrections
+
+ -- J. Hamatoma <hama@siduction.net>  Mon, 14 Apr 2014 18:29:39 +0200
+
 sidu-disk-center (2014.04.11) unstable; urgency=medium
 
   * no dependency to pywwetha 
