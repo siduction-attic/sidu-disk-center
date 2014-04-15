@@ -1,3 +1,9 @@
+sidu-disk-center (2014.04.14) unstable; urgency=medium
+
+  * url corrections
+
+ -- J. Hamatoma <hama@siduction.net>  Tue, 15 Apr 2014 22:19:59 +0200
+
 sidu-disk-center (2014.04.13) unstable; urgency=medium
 
   * pywwetha needs other urls
