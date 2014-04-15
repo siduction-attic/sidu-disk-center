@@ -41,7 +41,7 @@ class PartitionInfo:
         # size and unit, e.g. 11GB
         self._size = size2
         # flavour, arch, version
-        self._osInfo = ("nox", "32", "13.2");
+        self._osInfo = ("nox", "32", "13.2")
         
     def canBeRoot(self, minSize):
         '''Tests whether the partition can be used as root partition
@@ -122,6 +122,8 @@ class DiskInfoPage(Page):
         self._freePV = []
         self._volumeGroupList = []
         self._volumeGroups = {}
+        # physical disks
+        self._lvmVGs = []
         # flavour, arch, version
         self._osInfo = ("nox", "32", "13.2");
         self._filePartInfo = session.getConfigWithoutLanguage(

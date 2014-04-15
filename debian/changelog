@@ -1,3 +1,9 @@
+sidu-disk-center (2014.04.15) unstable; urgency=medium
+
+  * missing initializing
+
+ -- J. Hamatoma <hama@siduction.net>  Tue, 15 Apr 2014 23:42:07 +0200
+
 sidu-disk-center (2014.04.14) unstable; urgency=medium
 
   * url corrections
