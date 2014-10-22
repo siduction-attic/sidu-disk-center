@@ -161,4 +161,9 @@ td { vertical-align: top; }
 .unused{
 		border: 1px red solid;
 }
-.hidden { display: none; }
+.hidden { 
+	display: none;
+}
+.prewrapped { 
+	white-space: pre-wrap;
+}

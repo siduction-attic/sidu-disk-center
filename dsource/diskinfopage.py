@@ -506,9 +506,13 @@ class DiskInfoPage(Page):
         @return: a list of device names starting with '-'
         '''
         rc = ["-"]
-        minSize = int(self._session.getConfigWithoutLanguage(
+        value = self._session.getConfigOrNoneWithoutLanguage(
             "diskinfo.root.minsize.mb." 
-            + self._osInfo[0]))
+            + self._osInfo[0])
+        if value == None:
+            value = self._session.getConfigWithoutLanguage(
+                "diskinfo.root.minsize.mb.default") 
+        minSize = int(value)
         for partition in self._partitionList:
             if partition.canBeRoot(minSize):
                 dev = partition._device
